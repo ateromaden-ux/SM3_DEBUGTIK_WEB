@@ -107,58 +107,6 @@
             </div>
         </div>
 
-        {{-- ── CARD: Ganti Password ── --}}
-        <div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden">
-            <div class="bg-surface-container-low px-space-lg py-space-md border-b border-outline-variant/20 flex items-center gap-space-xs">
-                <span class="material-symbols-outlined text-tertiary text-[20px]">lock</span>
-                <h3 class="font-title-sm text-title-sm font-bold text-on-surface">Ganti Password</h3>
-            </div>
-            <form id="form-password" onsubmit="gantiPassword(event)" class="p-space-lg flex flex-col gap-space-md">
-                <div class="flex flex-col gap-space-2xs">
-                    <label class="font-label-badge text-label-badge uppercase text-outline">Password Lama <span class="text-error">*</span></label>
-                    <div class="relative">
-                        <input id="pw-lama" type="password" required placeholder="Masukkan password saat ini"
-                            class="w-full h-10 pl-space-sm pr-10 rounded-xl bg-surface-container-low border border-outline-variant/30 font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-tertiary"/>
-                        <button type="button" onclick="togglePw('pw-lama','eye-lama')"
-                            class="absolute right-3 top-2.5 text-outline hover:text-on-surface transition-colors">
-                            <span class="material-symbols-outlined text-[18px]" id="eye-lama">visibility</span>
-                        </button>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
-                    <div class="flex flex-col gap-space-2xs">
-                        <label class="font-label-badge text-label-badge uppercase text-outline">Password Baru <span class="text-error">*</span></label>
-                        <div class="relative">
-                            <input id="pw-baru" type="password" required placeholder="Min. 8 karakter"
-                                class="w-full h-10 pl-space-sm pr-10 rounded-xl bg-surface-container-low border border-outline-variant/30 font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-tertiary"/>
-                            <button type="button" onclick="togglePw('pw-baru','eye-baru')"
-                                class="absolute right-3 top-2.5 text-outline hover:text-on-surface transition-colors">
-                                <span class="material-symbols-outlined text-[18px]" id="eye-baru">visibility</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex flex-col gap-space-2xs">
-                        <label class="font-label-badge text-label-badge uppercase text-outline">Konfirmasi Password <span class="text-error">*</span></label>
-                        <div class="relative">
-                            <input id="pw-konfirm" type="password" required placeholder="Ulangi password baru"
-                                class="w-full h-10 pl-space-sm pr-10 rounded-xl bg-surface-container-low border border-outline-variant/30 font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-tertiary"/>
-                            <button type="button" onclick="togglePw('pw-konfirm','eye-konfirm')"
-                                class="absolute right-3 top-2.5 text-outline hover:text-on-surface transition-colors">
-                                <span class="material-symbols-outlined text-[18px]" id="eye-konfirm">visibility</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex justify-end pt-space-xs border-t border-outline-variant/20">
-                    <button type="submit" id="btn-ganti-pw"
-                        class="flex items-center gap-space-xs px-space-xl py-space-sm rounded-xl bg-tertiary text-on-tertiary font-title-sm text-title-sm font-semibold hover:opacity-90 transition-opacity shadow-sm active:scale-95">
-                        <span class="material-symbols-outlined text-[18px]">lock_reset</span>
-                        Ubah Password
-                    </button>
-                </div>
-            </form>
-        </div>
-
         {{-- ── CARD: Logout ── --}}
         <div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden">
             <div class="bg-surface-container-low px-space-lg py-space-md border-b border-outline-variant/20 flex items-center gap-space-xs">
