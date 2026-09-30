@@ -470,14 +470,12 @@
                     <span class="font-body-sm text-body-sm text-on-surface-variant">Total poin</span>
                     <span class="font-code-inline text-code-inline font-bold text-on-surface" id="total-poin">{{ $soalList->sum('poin') }}</span>
                 </div>
-                @if($settings)
-                <div class="flex items-center justify-between mt-space-2xs">
-                    <span class="font-body-sm text-body-sm text-on-surface-variant">Lulus jika ≥ KKM {{ $settings->kkm }}%</span>
+                <div id="kkm-row" class="flex items-center justify-between mt-space-2xs {{ $settings ? '' : 'hidden' }}">
+                    <span class="font-body-sm text-body-sm text-on-surface-variant" id="kkm-label">Lulus jika ≥ KKM {{ $settings?->kkm ?? 70 }}%</span>
                     <span class="font-code-inline text-code-inline text-secondary font-bold" id="poin-kkm">
-                        ≥ {{ round($soalList->sum('poin') * $settings->kkm / 100) }} poin
+                        ≥ {{ $settings ? round($soalList->sum('poin') * $settings->kkm / 100) : 0 }} poin
                     </span>
                 </div>
-                @endif
             </div>
         </div>
 
@@ -1067,6 +1065,14 @@
         const totalPoin = Object.values(soalData).reduce((s, d) => s + (parseInt(d.poin) || 0), 0);
         document.getElementById('soal-counter').innerText = count + ' soal';
         document.getElementById('total-poin').innerText   = totalPoin;
+
+        // Update poin KKM jika row sudah visible
+        const kkmRow = document.getElementById('kkm-row');
+        const poinEl = document.getElementById('poin-kkm');
+        const kkmVal = parseInt(document.getElementById('s-kkm')?.value) || 0;
+        if (poinEl && kkmRow && !kkmRow.classList.contains('hidden')) {
+            poinEl.textContent = '≥ ' + Math.round(totalPoin * kkmVal / 100) + ' poin';
+        }
     }
 
     // ─── HAPUS (dari list card) ───────────────────────────────────────────────
@@ -1175,10 +1181,14 @@
 
                 // Update KKM footer
                 const poinEl = document.getElementById('poin-kkm');
+                const kkmRow = document.getElementById('kkm-row');
+                const kkmLabel = document.getElementById('kkm-label');
                 if (poinEl) {
                     const totalPoin = parseInt(document.getElementById('total-poin').textContent) || 0;
                     poinEl.textContent = '≥ ' + Math.round(totalPoin * s.kkm / 100) + ' poin';
                 }
+                if (kkmLabel) kkmLabel.textContent = 'Lulus jika ≥ KKM ' + s.kkm + '%';
+                if (kkmRow)  kkmRow.classList.remove('hidden');
 
                 // Enable tombol soal baru
                 const btnSoal = document.getElementById('btn-soal-baru');

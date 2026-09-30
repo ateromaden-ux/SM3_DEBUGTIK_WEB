@@ -20,8 +20,8 @@ class KuisSettings extends Model
 
     protected $casts = [
         'waktu_per_soal' => 'integer',
-        'kkm'            => 'integer',
-        'published_at'   => 'datetime',
+        'kkm' => 'integer',
+        'published_at' => 'datetime',
     ];
 
     public function isPublished(): bool
@@ -45,9 +45,9 @@ class KuisSettings extends Model
      */
     public function waktuDalamDetik(): int
     {
-        return match($this->satuan_waktu) {
+        return match ($this->satuan_waktu) {
             'menit' => $this->waktu_per_soal * 60,
-            'jam'   => $this->waktu_per_soal * 3600,
+            'jam' => $this->waktu_per_soal * 3600,
             default => $this->waktu_per_soal,
         };
     }

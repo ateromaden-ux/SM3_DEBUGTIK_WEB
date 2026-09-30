@@ -1361,6 +1361,9 @@
             .catch(err => showToast('Error: ' + err.message, 'error'));
     }
 
+    // Stub — fitur kuis sudah dipindah ke halaman /kuis/{materi}
+    function toggleOpsiJawaban() {}
+
     // Init opsi jawaban visibility
     toggleOpsiJawaban();
 

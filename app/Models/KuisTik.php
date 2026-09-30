@@ -21,8 +21,8 @@ class KuisTik extends Model
     ];
 
     protected $casts = [
-        'opsi_jawaban'    => 'array',
-        'kunci_jawaban'   => 'array',
+        'opsi_jawaban' => 'array',
+        'kunci_jawaban' => 'array',
         'penjelasan_opsi' => 'array',
     ];
 
@@ -33,6 +33,6 @@ class KuisTik extends Model
 
     public function attachments()
     {
-        return $this->morphMany(\App\Models\Attachment::class, 'attachable');
+        return $this->morphMany(Attachment::class, 'attachable');
     }
 }

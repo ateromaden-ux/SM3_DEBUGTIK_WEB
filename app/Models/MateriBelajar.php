@@ -48,6 +48,6 @@ class MateriBelajar extends Model
 
     public function attachments()
     {
-        return $this->morphMany(\App\Models\Attachment::class, 'attachable');
+        return $this->morphMany(Attachment::class, 'attachable');
     }
 }
