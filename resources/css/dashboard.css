@@ -1,0 +1,157 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+/* Material Design 3 Color Tokens */
+@theme {
+    --color-surface-tint: #006398;
+    --color-on-surface: #0b1c30;
+    --color-surface-container-lowest: #ffffff;
+    --color-on-secondary-container: #004666;
+    --color-primary-fixed-dim: #93ccff;
+    --color-secondary-fixed-dim: #89ceff;
+    --color-surface: #f8f9ff;
+    --color-error-container: #ffdad6;
+    --color-primary-container: #007bb9;
+    --color-outline: #707881;
+    --color-primary-fixed: #cce5ff;
+    --color-on-primary-fixed-variant: #004b73;
+    --color-on-primary-container: #fdfcff;
+    --color-surface-container-highest: #d3e4fe;
+    --color-secondary-fixed: #c9e6ff;
+    --color-surface-container-low: #eff4ff;
+    --color-inverse-on-surface: #eaf1ff;
+    --color-secondary: #006591;
+    --color-on-error-container: #93000a;
+    --color-primary: #006194;
+    --color-surface-variant: #d3e4fe;
+    --color-on-tertiary: #ffffff;
+    --color-secondary-container: #39b8fd;
+    --color-tertiary-fixed: #6ffbbe;
+    --color-on-background: #0b1c30;
+    --color-on-secondary: #ffffff;
+    --color-surface-dim: #cbdbf5;
+    --color-tertiary: #006947;
+    --color-background: #f8f9ff;
+    --color-on-tertiary-container: #f5fff6;
+    --color-on-primary: #ffffff;
+    --color-tertiary-container: #00855b;
+    --color-outline-variant: #bfc7d2;
+    --color-inverse-primary: #93ccff;
+    --color-on-tertiary-fixed: #002113;
+    --color-on-secondary-fixed-variant: #004c6e;
+    --color-error: #ba1a1a;
+    --color-surface-container: #e5eeff;
+    --color-on-tertiary-fixed-variant: #005236;
+    --color-surface-bright: #f8f9ff;
+    --color-inverse-surface: #213145;
+    --color-surface-container-high: #dce9ff;
+    --color-tertiary-fixed-dim: #4edea3;
+    --color-on-primary-fixed: #001d31;
+    --color-on-secondary-fixed: #001e2f;
+    --color-on-surface-variant: #3f4850;
+    --color-on-error: #ffffff;
+}
+
+/* Custom properties for spacing and typography */
+@theme {
+    --border-radius-default: 0.125rem;
+    --border-radius-lg: 0.25rem;
+    --border-radius-xl: 0.5rem;
+    --border-radius-full: 0.75rem;
+    --spacing-gutter-desktop: 1.5rem;
+    --spacing-space-2xl: 3rem;
+    --spacing-max-width-canvas: 88rem;
+    --spacing-space-xs: 0.5rem;
+    --spacing-gutter-mobile: 1rem;
+    --spacing-space-3xl: 4rem;
+    --spacing-space-xl: 2rem;
+    --spacing-space-2xs: 0.25rem;
+    --spacing-space-md: 1rem;
+    --spacing-space-lg: 1.5rem;
+    --spacing-space-sm: 0.75rem;
+    --font-headline-lg: "Space Grotesk";
+    --font-body-lg: "Geist";
+    --font-display-hero-mobile: "Space Grotesk";
+    --font-headline-xl-mobile: "Space Grotesk";
+    --font-title-sm: "Geist";
+    --font-code-inline: "JetBrains Mono";
+    --font-body-sm: "Geist";
+    --font-code-editor: "JetBrains Mono";
+    --font-headline-xl: "Space Grotesk";
+    --font-label-badge: "JetBrains Mono";
+    --font-display-hero: "Space Grotesk";
+    --font-headline-md: "Space Grotesk";
+    --font-body-md: "Geist";
+    --font-size-headline-lg: 24px;
+    --font-size-body-lg: 18px;
+    --font-size-display-hero-mobile: 32px;
+    --font-size-headline-xl-mobile: 28px;
+    --font-size-title-sm: 16px;
+    --font-size-code-inline: 12px;
+    --font-size-body-sm: 12px;
+    --font-size-code-editor: 13px;
+    --font-size-headline-xl: 36px;
+    --font-size-label-badge: 11px;
+    --font-size-display-hero: 48px;
+    --font-size-headline-md: 20px;
+    --font-size-body-md: 14px;
+    --line-height-headline-lg: 32px;
+    --line-height-body-lg: 28px;
+    --line-height-display-hero-mobile: 40px;
+    --line-height-headline-xl-mobile: 36px;
+    --line-height-title-sm: 24px;
+    --line-height-code-inline: 16px;
+    --line-height-body-sm: 18px;
+    --line-height-code-editor: 22px;
+    --line-height-headline-xl: 44px;
+    --line-height-label-badge: 14px;
+    --line-height-display-hero: 56px;
+    --line-height-headline-md: 28px;
+    --line-height-body-md: 22px;
+    --letter-spacing-headline-lg: -0.015em;
+    --letter-spacing-body-lg: 0em;
+    --letter-spacing-display-hero-mobile: -0.02em;
+    --letter-spacing-headline-xl-mobile: -0.02em;
+    --letter-spacing-title-sm: -0.005em;
+    --letter-spacing-code-inline: -0.01em;
+    --letter-spacing-body-sm: 0.005em;
+    --letter-spacing-code-editor: 0em;
+    --letter-spacing-headline-xl: -0.025em;
+    --letter-spacing-label-badge: 0.04em;
+    --letter-spacing-display-hero: -0.03em;
+    --letter-spacing-headline-md: -0.01em;
+    --letter-spacing-body-md: 0em;
+}
+
+/* Base utilities */
+@layer base {
+    html, body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+    }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Custom utilities */
+@layer utilities {
+    .text-gradient {
+        background: linear-gradient(to right, var(--tw-gradient-stops));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+}
