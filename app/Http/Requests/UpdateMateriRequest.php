@@ -27,7 +27,7 @@ class UpdateMateriRequest extends FormRequest
             'kategori' => ['sometimes', 'in:HTML Dasar,CSS Dasar,JS Dasar,Web Responsif'],
             'level' => ['sometimes', 'in:Pemula,Menengah,Lanjutan'],
             'konten' => ['sometimes', 'string'],
-            'estimasi_waktu' => ['sometimes', 'integer', 'min:0', 'max:9999'],
+            'estimasi_waktu' => ['sometimes', 'integer', 'min:0', 'max:999'],
             'tingkat_kesulitan' => ['sometimes', 'integer', 'in:1,2,3'],
             'published' => ['sometimes', 'boolean'],
         ];

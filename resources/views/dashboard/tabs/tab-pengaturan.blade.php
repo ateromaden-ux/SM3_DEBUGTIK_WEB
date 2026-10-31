@@ -92,9 +92,19 @@
             <div class="p-space-lg grid grid-cols-1 sm:grid-cols-2 gap-space-md">
                 <div class="flex flex-col gap-space-2xs">
                     <label class="font-label-badge text-label-badge uppercase text-outline">Tahun Ajaran <span class="text-error">*</span></label>
-                    <input id="pg-tahun" name="tahun_ajaran" type="text" form="form-profil"
-                        value="{{ $guru->tahun_ajaran ?? '2024/2025' }}" placeholder="2024/2025"
-                        class="h-10 px-space-sm rounded-xl bg-surface-container-low border border-outline-variant/30 font-code-inline text-code-inline text-on-surface focus:outline-none focus:border-secondary"/>
+                    <select id="pg-tahun" name="tahun_ajaran" form="form-profil"
+                        class="h-10 px-space-sm rounded-xl bg-surface-container-low border border-outline-variant/30 font-code-inline text-code-inline text-on-surface focus:outline-none focus:border-secondary cursor-pointer">
+                        @php
+                            $tahunSekarang = (int) date('Y');
+                            $tahunAjaran   = $guru->tahun_ajaran ?? ($tahunSekarang . '/' . ($tahunSekarang + 1));
+                        @endphp
+                        @for($y = $tahunSekarang - 2; $y <= $tahunSekarang + 2; $y++)
+                            @php $opsi = $y . '/' . ($y + 1); @endphp
+                            <option value="{{ $opsi }}" {{ $tahunAjaran === $opsi ? 'selected' : '' }}>
+                                {{ $opsi }}
+                            </option>
+                        @endfor
+                    </select>
                 </div>
                 <div class="flex flex-col gap-space-2xs">
                     <label class="font-label-badge text-label-badge uppercase text-outline">Semester <span class="text-error">*</span></label>

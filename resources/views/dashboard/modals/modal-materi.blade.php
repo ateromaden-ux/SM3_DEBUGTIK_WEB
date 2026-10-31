@@ -49,31 +49,15 @@
                        id="input-judul-materi" placeholder="Contoh: JavaScript Lanjutan: DOM Manipulation & Event Listener" required type="text"/>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
-                <div class="flex flex-col gap-space-2xs">
-                    <label class="font-label-badge text-label-badge uppercase text-outline">Kategori Modul <span class="text-error">*</span></label>
-                    <select class="w-full h-10 px-space-sm rounded-xl bg-surface-container-low font-body-sm text-body-sm text-on-surface focus:outline-none focus:bg-surface shadow-sm cursor-pointer"
-                            id="input-kategori">
-                        <option value="HTML Dasar">HTML Dasar</option>
-                        <option value="CSS Dasar">CSS Dasar</option>
-                        <option value="JS Dasar">JavaScript Dasar</option>
-                        <option value="Web Responsif">Web Responsif (Flex & Grid)</option>
-                    </select>
-                </div>
-                <div class="flex flex-col gap-space-2xs">
-                    <label class="font-label-badge text-label-badge uppercase text-outline">Estimasi Waktu <span class="text-error">*</span></label>
-                    <div class="flex gap-space-xs">
-                        <input class="w-full h-10 px-space-sm rounded-xl bg-surface-container-low font-code-inline text-code-inline text-on-surface focus:outline-none focus:bg-surface shadow-sm disabled:opacity-50"
-                               id="input-estimasi-waktu" min="10" required type="number" value="45"/>
-                        <select id="input-estimasi-tak-terbatas"
-                            onchange="toggleEstimasiTakTerbatas(this.value)"
-                            class="h-10 px-space-xs rounded-xl bg-surface-container-low border border-outline-variant/30 font-body-sm text-body-sm text-on-surface focus:outline-none cursor-pointer flex-shrink-0">
-                            <option value="menit">Menit</option>
-                            <option value="tak-terbatas">Tak Terbatas</option>
-                        </select>
-                    </div>
-                    <p class="font-body-sm text-body-sm text-outline">"Tak Terbatas" = siswa bisa baca kapanpun tanpa batas waktu.</p>
-                </div>
+            <div class="flex flex-col gap-space-2xs">
+                <label class="font-label-badge text-label-badge uppercase text-outline">Kategori Modul <span class="text-error">*</span></label>
+                <select class="w-full h-10 px-space-sm rounded-xl bg-surface-container-low font-body-sm text-body-sm text-on-surface focus:outline-none focus:bg-surface shadow-sm cursor-pointer"
+                        id="input-kategori">
+                    <option value="HTML Dasar">HTML Dasar</option>
+                    <option value="CSS Dasar">CSS Dasar</option>
+                    <option value="JS Dasar">JavaScript Dasar</option>
+                    <option value="Web Responsif">Web Responsif (Flex & Grid)</option>
+                </select>
             </div>
 
             <div class="flex flex-col gap-space-2xs">

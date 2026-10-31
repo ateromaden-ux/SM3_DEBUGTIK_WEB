@@ -76,21 +76,6 @@ document.querySelectorAll('[data-tab]').forEach(tab => {
 const tabParam = new URLSearchParams(window.location.search).get('tab');
 switchTab(tabParam || 'dashboard');
 
-// ─── ESTIMASI WAKTU — TAK TERBATAS ──────────────────────────────────────────
-function toggleEstimasiTakTerbatas(value) {
-    const input = document.getElementById('input-estimasi-waktu');
-    if (!input) { return; }
-    if (value === 'tak-terbatas') {
-        input.disabled = true;
-        input.value    = 0;
-        input.removeAttribute('required');
-    } else {
-        input.disabled = false;
-        input.value    = input.value === '0' ? 45 : input.value;
-        input.setAttribute('required', '');
-    }
-}
-
 // ─── MODAL MATERI ─────────────────────────────────────────────────────────────
 function toggleModal(open) {
     const modal = document.getElementById('materi-modal');
@@ -104,9 +89,6 @@ function toggleModal(open) {
         document.getElementById('modal-title').innerText = '+ Tambah Materi Belajar Baru';
         document.getElementById('input-materi-db-id').value = '';
         document.getElementById('materi-form').reset();
-        // Reset estimasi waktu
-        const selectTak = document.getElementById('input-estimasi-tak-terbatas');
-        if (selectTak) { selectTak.value = 'menit'; toggleEstimasiTakTerbatas('menit'); }
         _materiPendingFiles = [];
         renderMateriFilePreview();
         const saved = document.getElementById('materi-saved-attachments');
@@ -122,17 +104,6 @@ function openEditorModal(dbId, idMateri, title, category, level, time, deskripsi
     document.getElementById('input-kategori').value       = category;
     document.getElementById('input-level-materi').value   = level;
     document.getElementById('input-deskripsi').value      = deskripsi;
-
-    // Set estimasi waktu — 0 berarti tak terbatas
-    const selectTak = document.getElementById('input-estimasi-tak-terbatas');
-    if (parseInt(time) === 0) {
-        selectTak.value = 'tak-terbatas';
-        toggleEstimasiTakTerbatas('tak-terbatas');
-    } else {
-        selectTak.value = 'menit';
-        toggleEstimasiTakTerbatas('menit');
-        document.getElementById('input-estimasi-waktu').value = time;
-    }
 
     _materiPendingFiles = [];
     renderMateriFilePreview();

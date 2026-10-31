@@ -13,7 +13,7 @@ class GuruTableSeeder extends Seeder
         Guru::create([
             'nip' => '198512051234567890',
             'name' => 'Siti Nurhaliza',
-            'email' => 'siti.nurhaliza@sekolah.sch.id',
+            'email' => ' ',
             'password' => Hash::make('password123'),
             'role' => 'teacher',
             'sekolah' => 'SMAN 1 Jakarta Pusat',

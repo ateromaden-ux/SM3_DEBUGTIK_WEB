@@ -20,7 +20,7 @@ class StoreMateriRequest extends FormRequest
             'kategori' => ['required', 'in:HTML Dasar,CSS Dasar,JS Dasar,Web Responsif'],
             'level' => ['required', 'in:Pemula,Menengah,Lanjutan'],
             'konten' => ['nullable', 'string'],
-            'estimasi_waktu' => ['required', 'integer', 'min:0', 'max:9999'],
+            'estimasi_waktu' => ['nullable', 'integer', 'min:0', 'max:999'],
             'tingkat_kesulitan' => ['integer', 'in:1,2,3'],
         ];
     }
