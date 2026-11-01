@@ -98,7 +98,9 @@ class MateriBelajarController extends Controller
     public function getMetrics()
     {
         $guru = $this->getGuru();
-        $materis = MateriBelajar::where('guru_id', $guru->id)->get();
+        $materis = MateriBelajar::where('guru_id', $guru->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
         $ids = $materis->pluck('id');
 
         return response()->json([

@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Guru;
 use App\Models\ApiToken;
+use App\Models\Guru;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Storage;
 
 class AuthApiController extends Controller
 {
@@ -22,35 +22,35 @@ class AuthApiController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'name'                  => 'required|string|max:255',
-            'email'                 => 'required|email|unique:users,email',
-            'password'              => 'required|string|min:8|confirmed',
-            'kelas'                 => 'nullable|string|max:20',
-            'no_hp'                 => 'nullable|string|max:15',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+            'kelas' => 'nullable|string|max:20',
+            'no_hp' => 'nullable|string|max:15',
         ], [
-            'email.unique'          => 'Email sudah terdaftar.',
-            'password.min'          => 'Password minimal 8 karakter.',
-            'password.confirmed'    => 'Konfirmasi password tidak cocok.',
+            'email.unique' => 'Email sudah terdaftar.',
+            'password.min' => 'Password minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 
         $user = User::create([
-            'name'     => $validated['name'],
-            'email'    => $validated['email'],
+            'name' => $validated['name'],
+            'email' => $validated['email'],
             'password' => $validated['password'], // auto-hashed via cast
-            'kelas'    => $validated['kelas'] ?? null,
-            'no_hp'    => $validated['no_hp']  ?? null,
-            'active'   => true,
+            'kelas' => $validated['kelas'] ?? null,
+            'no_hp' => $validated['no_hp'] ?? null,
+            'active' => true,
         ]);
 
         $token = $user->createApiToken('android-register');
 
         return response()->json([
             'success' => true,
-            'message' => 'Registrasi berhasil. Selamat datang, ' . $user->name . '!',
-            'data'    => [
+            'message' => 'Registrasi berhasil. Selamat datang, '.$user->name.'!',
+            'data' => [
                 'token' => $token,
-                'type'  => 'Bearer',
-                'user'  => $this->formatUser($user),
+                'type' => 'Bearer',
+                'user' => $this->formatUser($user),
             ],
         ], 201);
     }
@@ -65,14 +65,14 @@ class AuthApiController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email'    => 'required|email',
+            'email' => 'required|email',
             'password' => 'required|string',
-            'role'     => 'nullable|in:siswa,guru',
+            'role' => 'nullable|in:siswa,guru',
         ]);
 
-        $role  = $request->input('role', 'siswa'); // default: coba siswa dulu
+        $role = $request->input('role', 'siswa'); // default: coba siswa dulu
         $email = $request->input('email');
-        $pass  = $request->input('password');
+        $pass = $request->input('password');
 
         // ── Coba login sebagai siswa ──────────────────────────────────────────
         if ($role !== 'guru') {
@@ -86,11 +86,11 @@ class AuthApiController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Login berhasil.',
-                    'data'    => [
+                    'data' => [
                         'token' => $token,
-                        'type'  => 'Bearer',
-                        'role'  => 'siswa',
-                        'user'  => $this->formatUser($user),
+                        'type' => 'Bearer',
+                        'role' => 'siswa',
+                        'user' => $this->formatUser($user),
                     ],
                 ]);
             }
@@ -107,11 +107,11 @@ class AuthApiController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Login berhasil.',
-                    'data'    => [
+                    'data' => [
                         'token' => $token,
-                        'type'  => 'Bearer',
-                        'role'  => 'guru',
-                        'guru'  => $this->formatGuru($guru),
+                        'type' => 'Bearer',
+                        'role' => 'guru',
+                        'guru' => $this->formatGuru($guru),
                     ],
                 ]);
             }
@@ -130,7 +130,7 @@ class AuthApiController extends Controller
      */
     public function logout(Request $request)
     {
-        $plain  = $request->bearerToken();
+        $plain = $request->bearerToken();
         $hashed = hash('sha256', $plain ?? '');
         ApiToken::where('token', $hashed)->delete();
 
@@ -152,16 +152,16 @@ class AuthApiController extends Controller
         if ($tokenable instanceof User) {
             return response()->json([
                 'success' => true,
-                'role'    => 'siswa',
-                'data'    => $this->formatUser($tokenable),
+                'role' => 'siswa',
+                'data' => $this->formatUser($tokenable),
             ]);
         }
 
         if ($tokenable instanceof Guru) {
             return response()->json([
                 'success' => true,
-                'role'    => 'guru',
-                'data'    => $this->formatGuru($tokenable),
+                'role' => 'guru',
+                'data' => $this->formatGuru($tokenable),
             ]);
         }
 
@@ -176,15 +176,15 @@ class AuthApiController extends Controller
     {
         $user = $request->user();
 
-        if (!($user instanceof User)) {
+        if (! ($user instanceof User)) {
             return response()->json(['message' => 'Hanya siswa yang bisa update profil via endpoint ini.'], 403);
         }
 
         $validated = $request->validate([
-            'name'   => 'sometimes|string|max:255',
-            'kelas'  => 'sometimes|nullable|string|max:20',
-            'no_hp'  => 'sometimes|nullable|string|max:15',
-            'foto'   => 'sometimes|image|max:2048', // maks 2 MB
+            'name' => 'sometimes|string|max:255',
+            'kelas' => 'sometimes|nullable|string|max:20',
+            'no_hp' => 'sometimes|nullable|string|max:15',
+            'foto' => 'sometimes|image|max:2048', // maks 2 MB
         ]);
 
         if ($request->hasFile('foto')) {
@@ -198,7 +198,7 @@ class AuthApiController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Profil berhasil diperbarui.',
-            'data'    => $this->formatUser($user->fresh()),
+            'data' => $this->formatUser($user->fresh()),
         ]);
     }
 
@@ -210,18 +210,18 @@ class AuthApiController extends Controller
     {
         $user = $request->user();
 
-        if (!($user instanceof User)) {
+        if (! ($user instanceof User)) {
             return response()->json(['message' => 'Endpoint ini hanya untuk siswa.'], 403);
         }
 
         $request->validate([
             'current_password' => 'required|string',
-            'password'         => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:8|confirmed',
         ], [
             'password.confirmed' => 'Konfirmasi password baru tidak cocok.',
         ]);
 
-        if (!Hash::check($request->current_password, $user->password)) {
+        if (! Hash::check($request->current_password, $user->password)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Password lama salah.',
@@ -241,29 +241,29 @@ class AuthApiController extends Controller
     private function formatUser(User $user): array
     {
         return [
-            'id'          => $user->id,
-            'name'        => $user->name,
-            'email'       => $user->email,
-            'kelas'       => $user->kelas,
-            'no_hp'       => $user->no_hp,
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'kelas' => $user->kelas,
+            'no_hp' => $user->no_hp,
             'foto_profil' => $user->foto_profil
-                ? \Illuminate\Support\Facades\Storage::disk('public')->url($user->foto_profil)
+                ? Storage::disk('public')->url($user->foto_profil)
                 : null,
-            'active'      => $user->active,
-            'last_login'  => $user->last_login?->toIso8601String(),
-            'created_at'  => $user->created_at?->toIso8601String(),
+            'active' => $user->active,
+            'last_login' => $user->last_login?->toIso8601String(),
+            'created_at' => $user->created_at?->toIso8601String(),
         ];
     }
 
     private function formatGuru(Guru $guru): array
     {
         return [
-            'id'       => $guru->id,
-            'name'     => $guru->name,
-            'email'    => $guru->email,
-            'role'     => $guru->role,
-            'sekolah'  => $guru->sekolah,
-            'active'   => $guru->active,
+            'id' => $guru->id,
+            'name' => $guru->name,
+            'email' => $guru->email,
+            'role' => $guru->role,
+            'sekolah' => $guru->sekolah,
+            'active' => $guru->active,
             'last_login' => $guru->last_login?->toIso8601String(),
         ];
     }

@@ -15,14 +15,19 @@ class StoreKuisRequest extends FormRequest
     public function rules(): array
     {
         $materiId = $this->input('materi_id');
+        $kuisSettingsId = $this->input('kuis_settings_id');
 
         return [
-            'materi_id' => ['required', 'exists:materi_belajar,id'],
+            'materi_id' => ['nullable', 'exists:materi_belajar,id'],
+            'kuis_settings_id' => ['nullable', 'exists:kuis_settings,id'],
             'id_soal' => ['nullable', 'string', 'unique:kuis_tik,id_soal'],
             'pertanyaan' => [
                 'required',
                 'string',
-                Rule::unique('kuis_tik', 'pertanyaan')->where('materi_id', $materiId),
+                // unique per materi jika ada, atau per kuis_settings jika standalone
+                $materiId
+                    ? Rule::unique('kuis_tik', 'pertanyaan')->where('materi_id', $materiId)
+                    : Rule::unique('kuis_tik', 'pertanyaan')->where('kuis_settings_id', $kuisSettingsId),
             ],
             'tipe' => ['required', 'in:pilihan_ganda,multiple_answer,essay'],
             'opsi_jawaban' => ['nullable', 'array', 'min:2'],
@@ -30,6 +35,7 @@ class StoreKuisRequest extends FormRequest
             'kunci_jawaban.*' => ['string'],
             'penjelasan_opsi' => ['nullable', 'array'],
             'poin' => ['required', 'integer', 'min:1', 'max:200'],
+            'waktu' => ['required', 'integer', 'min:1', 'max:3600'],
             'urutan' => ['nullable', 'integer', 'min:1'],
         ];
     }
@@ -37,8 +43,7 @@ class StoreKuisRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'id_soal.unique' => 'ID soal sudah digunakan.',
-            'pertanyaan.unique' => 'Pertanyaan ini sudah ada di kuis materi ini.',
+            'pertanyaan.unique' => 'Pertanyaan ini sudah ada di kuis ini.',
             'poin.required' => 'Poin wajib diisi.',
         ];
     }

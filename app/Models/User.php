@@ -28,9 +28,9 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'last_login'        => 'datetime',
-        'password'          => 'hashed',
-        'active'            => 'boolean',
+        'last_login' => 'datetime',
+        'password' => 'hashed',
+        'active' => 'boolean',
     ];
 
     // Relasi ke token API
@@ -45,8 +45,8 @@ class User extends Authenticatable
         $plaintext = ApiToken::generate();
 
         $this->apiTokens()->create([
-            'name'    => $name,
-            'token'   => hash('sha256', $plaintext),
+            'name' => $name,
+            'token' => hash('sha256', $plaintext),
             'abilities' => '*',
         ]);
 

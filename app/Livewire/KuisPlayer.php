@@ -2,19 +2,26 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use App\Models\KuisTik;
 use App\Models\MateriBelajar;
+use Livewire\Component;
 
 class KuisPlayer extends Component
 {
     public $materi;
+
     public $questions;
+
     public $currentIndex = 0;
+
     public $score = 0;
+
     public $timer = 15;
+
     public $isAnswered = false;
+
     public $selected = null;
+
     public $showResult = false;
 
     public function mount(MateriBelajar $materi)
@@ -22,11 +29,17 @@ class KuisPlayer extends Component
         $this->materi = $materi;
         // Ambil soal dan acak (shuffle) agar pengalaman seperti game
         $this->questions = KuisTik::where('materi_id', $materi->id)->get()->shuffle();
+        // Set timer dari soal pertama
+        if (count($this->questions) > 0) {
+            $this->timer = $this->questions[0]->waktu ?? 30;
+        }
     }
 
     public function timerTick()
     {
-        if ($this->showResult || $this->isAnswered) return;
+        if ($this->showResult || $this->isAnswered) {
+            return;
+        }
 
         if ($this->timer > 0) {
             $this->timer--;
@@ -37,11 +50,13 @@ class KuisPlayer extends Component
 
     public function selectAnswer($opsi)
     {
-        if ($this->isAnswered) return;
+        if ($this->isAnswered) {
+            return;
+        }
 
         $this->isAnswered = true;
         $this->selected = $opsi;
-        
+
         $currentQuestion = $this->questions[$this->currentIndex];
 
         // Cek jawaban
@@ -56,7 +71,7 @@ class KuisPlayer extends Component
             $this->currentIndex++;
             $this->isAnswered = false;
             $this->selected = null;
-            $this->timer = 15;
+            $this->timer = $this->questions[$this->currentIndex]->waktu ?? 30;
         } else {
             $this->showResult = true;
         }

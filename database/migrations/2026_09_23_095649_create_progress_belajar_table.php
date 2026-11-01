@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamp('selesai_belajar')->nullable();
             $table->text('catatan')->nullable();
             $table->timestamps();
-            
+
             $table->unique(['user_id', 'materi_id']);
         });
     }

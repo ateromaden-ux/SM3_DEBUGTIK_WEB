@@ -43,8 +43,8 @@ class Guru extends Authenticatable
         $plaintext = ApiToken::generate();
 
         $this->apiTokens()->create([
-            'name'      => $name,
-            'token'     => hash('sha256', $plaintext),
+            'name' => $name,
+            'token' => hash('sha256', $plaintext),
             'abilities' => '*',
         ]);
 

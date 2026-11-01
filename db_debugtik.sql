@@ -1,646 +1,679 @@
--- phpMyAdmin SQL Dump
--- version 5.2.2
--- https://www.phpmyadmin.net/
---
--- Host: localhost:3306
--- Generation Time: Sep 30, 2026 at 12:44 PM
--- Server version: 8.4.3
--- PHP Version: 8.3.26
+-- =====================================================================
+-- db_debugtik : schema rapi + tipe data disesuaikan
+-- MySQL 8.x | utf8mb4 | InnoDB
+-- =====================================================================
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
+
 SET time_zone = "+00:00";
 
+SET NAMES utf8mb4;
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+SET FOREIGN_KEY_CHECKS = 0;
 
---
--- Database: `db_debugtik`
---
+CREATE DATABASE IF NOT EXISTS `db_debugtik` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
+USE `db_debugtik`;
 
---
--- Table structure for table `api_tokens`
---
+-- =====================================================================
+-- 1. TABEL INTI APLIKASI
+-- =====================================================================
 
-CREATE TABLE `api_tokens` (
-  `id` bigint UNSIGNED NOT NULL,
-  `tokenable_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `tokenable_id` bigint UNSIGNED NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `token` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `abilities` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '*',
-  `last_used_at` timestamp NULL DEFAULT NULL,
-  `expires_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- ---------------------------------------------------------------------
+-- gurus
+-- ---------------------------------------------------------------------
+CREATE TABLE `gurus` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `nip` VARCHAR(18) NOT NULL COMMENT 'NIP = 18 digit',
+    `name` VARCHAR(100) NOT NULL,
+    `email` VARCHAR(100) NOT NULL,
+    `password` VARCHAR(255) NOT NULL COMMENT 'hash bcrypt/argon, biarkan 255',
+    `role` ENUM('teacher', 'lab_admin') NOT NULL,
+    `sekolah` VARCHAR(150) NOT NULL,
+    `foto_profil` VARCHAR(150) DEFAULT NULL,
+    `tahun_ajaran` VARCHAR(9) NOT NULL DEFAULT '2024/2025',
+    `semester` ENUM('Ganjil', 'Genap') NOT NULL DEFAULT 'Ganjil',
+    `mata_pelajaran` VARCHAR(100) NOT NULL DEFAULT 'Teknologi Informasi & Komunikasi',
+    `no_hp` VARCHAR(20) DEFAULT NULL,
+    `active` TINYINT(1) NOT NULL DEFAULT 1,
+    `last_login` TIMESTAMP NULL DEFAULT NULL,
+    `remember_token` VARCHAR(100) DEFAULT NULL,
+    `created_at` TIMESTAMP NULL DEFAULT NULL,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `gurus_nip_unique` (`nip`),
+    UNIQUE KEY `gurus_email_unique` (`email`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
+-- ---------------------------------------------------------------------
+-- users (siswa)
+-- ---------------------------------------------------------------------
+CREATE TABLE `users` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(100) NOT NULL,
+    `kelas` VARCHAR(20) DEFAULT NULL COMMENT 'contoh: XI RPL 1',
+    `no_hp` VARCHAR(20) DEFAULT NULL,
+    `foto_profil` VARCHAR(150) DEFAULT NULL,
+    `active` TINYINT(1) NOT NULL DEFAULT 1,
+    `last_login` TIMESTAMP NULL DEFAULT NULL,
+    `email` VARCHAR(100) NOT NULL,
+    `email_verified_at` TIMESTAMP NULL DEFAULT NULL,
+    `password` VARCHAR(255) NOT NULL,
+    `remember_token` VARCHAR(100) DEFAULT NULL,
+    `created_at` TIMESTAMP NULL DEFAULT NULL,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `users_email_unique` (`email`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
---
--- Table structure for table `attachments`
---
+-- ---------------------------------------------------------------------
+-- materi_belajar
+-- ---------------------------------------------------------------------
+CREATE TABLE `materi_belajar` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `id_materi` VARCHAR(30) NOT NULL COMMENT 'contoh: MAT-HTML-01',
+    `guru_id` BIGINT UNSIGNED NOT NULL,
+    `judul` VARCHAR(150) NOT NULL,
+    `deskripsi` VARCHAR(500) NOT NULL,
+    `kategori` ENUM(
+        'HTML Dasar',
+        'CSS Dasar',
+        'JS Dasar',
+        'Web Responsif'
+    ) NOT NULL,
+    `level` ENUM(
+        'Pemula',
+        'Menengah',
+        'Lanjutan'
+    ) NOT NULL DEFAULT 'Pemula',
+    `konten` TEXT NOT NULL,
+    `estimasi_waktu` SMALLINT UNSIGNED NOT NULL DEFAULT 45 COMMENT 'menit',
+    `tingkat_kesulitan` TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    `published` TINYINT(1) NOT NULL DEFAULT 0,
+    `created_at` TIMESTAMP NULL DEFAULT NULL,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `materi_belajar_id_materi_unique` (`id_materi`),
+    KEY `materi_belajar_guru_id_foreign` (`guru_id`),
+    CONSTRAINT `materi_belajar_guru_id_foreign` FOREIGN KEY (`guru_id`) REFERENCES `gurus` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
+-- ---------------------------------------------------------------------
+-- kuis_settings
+-- ---------------------------------------------------------------------
+CREATE TABLE `kuis_settings` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `materi_id` BIGINT UNSIGNED NOT NULL,
+    `id_kuis` VARCHAR(50) NOT NULL COMMENT 'Kode unik kuis, contoh: KUIS-HTML-2024',
+    `waktu_per_soal` SMALLINT UNSIGNED NOT NULL DEFAULT 30 COMMENT 'Nilai numerik waktu per soal',
+    `satuan_waktu` ENUM('detik', 'menit', 'jam') NOT NULL DEFAULT 'detik',
+    `kkm` TINYINT UNSIGNED NOT NULL DEFAULT 70 COMMENT 'Persentase minimum lulus, 0-100',
+    `status` ENUM('draft', 'published') NOT NULL DEFAULT 'draft',
+    `published_at` TIMESTAMP NULL DEFAULT NULL,
+    `created_at` TIMESTAMP NULL DEFAULT NULL,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `kuis_settings_materi_id_unique` (`materi_id`),
+    UNIQUE KEY `kuis_settings_id_kuis_unique` (`id_kuis`),
+    CONSTRAINT `kuis_settings_materi_id_foreign` FOREIGN KEY (`materi_id`) REFERENCES `materi_belajar` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------
+-- kuis_tik
+-- (kunci_jawaban sebelumnya TEXT, padahal isinya JSON -> diubah ke JSON,
+--  sesuai migrasi change_kunci_jawaban_to_json_in_kuis_tik)
+-- ---------------------------------------------------------------------
+CREATE TABLE `kuis_tik` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `materi_id` BIGINT UNSIGNED NOT NULL,
+    `id_soal` VARCHAR(50) NOT NULL,
+    `pertanyaan` TEXT NOT NULL,
+    `tipe` ENUM(
+        'pilihan_ganda',
+        'multiple_answer',
+        'essay'
+    ) NOT NULL DEFAULT 'pilihan_ganda',
+    `opsi_jawaban` JSON DEFAULT NULL,
+    `kunci_jawaban` JSON NOT NULL,
+    `penjelasan_opsi` JSON DEFAULT NULL,
+    `poin` SMALLINT UNSIGNED NOT NULL DEFAULT 25,
+    `urutan` SMALLINT UNSIGNED NOT NULL DEFAULT 1,
+    `created_at` TIMESTAMP NULL DEFAULT NULL,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `kuis_tik_id_soal_unique` (`id_soal`),
+    KEY `kuis_tik_materi_id_foreign` (`materi_id`),
+    CONSTRAINT `kuis_tik_materi_id_foreign` FOREIGN KEY (`materi_id`) REFERENCES `materi_belajar` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------
+-- lab_praktik
+-- ---------------------------------------------------------------------
+CREATE TABLE `lab_praktik` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `materi_id` BIGINT UNSIGNED NOT NULL,
+    `id_lab` VARCHAR(50) NOT NULL,
+    `deskripsi_kasus` TEXT NOT NULL,
+    `kode_soal_awal` TEXT NOT NULL,
+    `bug_target` TEXT NOT NULL,
+    `solusi_fix` TEXT NOT NULL,
+    `tingkat_kesulitan` ENUM('mudah', 'sedang', 'sulit') NOT NULL DEFAULT 'mudah',
+    `poin_max` SMALLINT UNSIGNED NOT NULL DEFAULT 100,
+    `test_cases` JSON DEFAULT NULL,
+    `created_at` TIMESTAMP NULL DEFAULT NULL,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `lab_praktik_id_lab_unique` (`id_lab`),
+    KEY `lab_praktik_materi_id_foreign` (`materi_id`),
+    CONSTRAINT `lab_praktik_materi_id_foreign` FOREIGN KEY (`materi_id`) REFERENCES `materi_belajar` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------
+-- progress_belajar
+-- Catatan: kolom status/status_selesai, progress_persen/persentase_selesai,
+-- dan skor/nilai_akhir terlihat redundan. Dipertahankan agar kode
+-- aplikasi tidak rusak; pertimbangkan digabung nanti.
+-- ---------------------------------------------------------------------
+CREATE TABLE `progress_belajar` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` BIGINT UNSIGNED NOT NULL,
+    `materi_id` BIGINT UNSIGNED NOT NULL,
+    `status` ENUM(
+        'belum_mulai',
+        'sedang_belajar',
+        'selesai'
+    ) NOT NULL DEFAULT 'belum_mulai',
+    `status_selesai` TINYINT(1) NOT NULL DEFAULT 0,
+    `progress_persen` TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '0-100',
+    `persentase_selesai` TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '0-100',
+    `skor` SMALLINT UNSIGNED DEFAULT NULL,
+    `nilai_kuis` TINYINT UNSIGNED DEFAULT NULL COMMENT '0-100',
+    `nilai_lab` TINYINT UNSIGNED DEFAULT NULL COMMENT '0-100',
+    `nilai_akhir` TINYINT UNSIGNED DEFAULT NULL COMMENT '0-100',
+    `mulai_belajar` TIMESTAMP NULL DEFAULT NULL,
+    `selesai_belajar` TIMESTAMP NULL DEFAULT NULL,
+    `catatan` TEXT DEFAULT NULL,
+    `created_at` TIMESTAMP NULL DEFAULT NULL,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `progress_belajar_user_id_materi_id_unique` (`user_id`, `materi_id`),
+    KEY `progress_belajar_materi_id_foreign` (`materi_id`),
+    CONSTRAINT `progress_belajar_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `progress_belajar_materi_id_foreign` FOREIGN KEY (`materi_id`) REFERENCES `materi_belajar` (`id`) ON DELETE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------
+-- attachments (polymorphic)
+-- ---------------------------------------------------------------------
 CREATE TABLE `attachments` (
-  `id` bigint UNSIGNED NOT NULL,
-  `attachable_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `attachable_id` bigint UNSIGNED NOT NULL,
-  `nama_file` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `path` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `mime_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `ukuran` bigint UNSIGNED NOT NULL,
-  `disk` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'public',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `attachable_type` VARCHAR(100) NOT NULL COMMENT 'nama class model',
+    `attachable_id` BIGINT UNSIGNED NOT NULL,
+    `nama_file` VARCHAR(150) NOT NULL,
+    `path` VARCHAR(255) NOT NULL,
+    `mime_type` VARCHAR(100) NOT NULL,
+    `ukuran` INT UNSIGNED NOT NULL COMMENT 'byte (maks ~4 GB)',
+    `disk` VARCHAR(20) NOT NULL DEFAULT 'public',
+    `created_at` TIMESTAMP NULL DEFAULT NULL,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `attachments_attachable_type_attachable_id_index` (
+        `attachable_type`,
+        `attachable_id`
+    )
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
+-- ---------------------------------------------------------------------
+-- api_tokens (polymorphic)
+-- ---------------------------------------------------------------------
+CREATE TABLE `api_tokens` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `tokenable_type` VARCHAR(100) NOT NULL,
+    `tokenable_id` BIGINT UNSIGNED NOT NULL,
+    `name` VARCHAR(100) NOT NULL,
+    `token` CHAR(64) NOT NULL COMMENT 'sha256 = tepat 64 karakter',
+    `abilities` VARCHAR(255) NOT NULL DEFAULT '*',
+    `last_used_at` TIMESTAMP NULL DEFAULT NULL,
+    `expires_at` TIMESTAMP NULL DEFAULT NULL,
+    `created_at` TIMESTAMP NULL DEFAULT NULL,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `api_tokens_token_unique` (`token`),
+    KEY `api_tokens_tokenable_type_tokenable_id_index` (
+        `tokenable_type`,
+        `tokenable_id`
+    )
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
---
--- Table structure for table `cache`
---
+-- =====================================================================
+-- 2. TABEL FRAMEWORK LARAVEL (sengaja TIDAK diubah ukurannya,
+--    supaya kompatibel dengan migrasi/driver bawaan Laravel)
+-- =====================================================================
 
 CREATE TABLE `cache` (
-  `key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `value` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `expiration` bigint NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `cache_locks`
---
+    `key` VARCHAR(255) NOT NULL,
+    `value` MEDIUMTEXT NOT NULL,
+    `expiration` BIGINT NOT NULL,
+    PRIMARY KEY (`key`),
+    KEY `cache_expiration_index` (`expiration`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `cache_locks` (
-  `key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `owner` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `expiration` bigint NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `failed_jobs`
---
-
-CREATE TABLE `failed_jobs` (
-  `id` bigint UNSIGNED NOT NULL,
-  `uuid` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `connection` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `queue` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `exception` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `failed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `gurus`
---
-
-CREATE TABLE `gurus` (
-  `id` bigint UNSIGNED NOT NULL,
-  `nip` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `role` enum('teacher','lab_admin') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `sekolah` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `foto_profil` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `tahun_ajaran` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '2024/2025',
-  `semester` enum('Ganjil','Genap') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Ganjil',
-  `mata_pelajaran` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Teknologi Informasi & Komunikasi',
-  `no_hp` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `active` tinyint(1) NOT NULL DEFAULT '1',
-  `last_login` timestamp NULL DEFAULT NULL,
-  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `gurus`
---
-
-INSERT INTO `gurus` (`id`, `nip`, `name`, `email`, `password`, `role`, `sekolah`, `foto_profil`, `tahun_ajaran`, `semester`, `mata_pelajaran`, `no_hp`, `active`, `last_login`, `remember_token`, `created_at`, `updated_at`) VALUES
-(1, '198512051234567890', 'Siti Nurhaliza', 'siti.nurhaliza@sekolah.sch.id', '$2y$12$qG5iSIzz9bNwW.vmJnm4ROV/HmbYkJ2O1EmXEywJPR9PxmpvGbhv2', 'teacher', 'SMAN 1 Jakarta Pusat', NULL, '2024/2025', 'Ganjil', 'Teknologi Informasi & Komunikasi', NULL, 1, NULL, 'Fj3zcEF6HWCZx0WN62G4sooITia1iKoYg3yawyA3d9V6NC6xooHKRJW636Nf', '2026-09-23 05:26:02', '2026-09-23 05:26:02'),
-(2, '198703151098765432', 'Ahmad Hidayat', 'ahmad.hidayat@sekolah.sch.id', '$2y$12$M6w4giAMoun0MvNMvhzNGOoJbJKCG/TzC7ntq9WWlaK7xZLPPCNVa', 'lab_admin', 'SMAN 1 Jakarta Pusat', NULL, '2024/2025', 'Ganjil', 'Teknologi Informasi & Komunikasi', NULL, 1, NULL, NULL, '2026-09-23 05:26:03', '2026-09-23 05:26:03');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `jobs`
---
+    `key` VARCHAR(255) NOT NULL,
+    `owner` VARCHAR(255) NOT NULL,
+    `expiration` BIGINT NOT NULL,
+    PRIMARY KEY (`key`),
+    KEY `cache_locks_expiration_index` (`expiration`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `jobs` (
-  `id` bigint UNSIGNED NOT NULL,
-  `queue` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `attempts` smallint UNSIGNED NOT NULL,
-  `reserved_at` int UNSIGNED DEFAULT NULL,
-  `available_at` int UNSIGNED NOT NULL,
-  `created_at` int UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `job_batches`
---
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `queue` VARCHAR(255) NOT NULL,
+    `payload` LONGTEXT NOT NULL,
+    `attempts` SMALLINT UNSIGNED NOT NULL,
+    `reserved_at` INT UNSIGNED DEFAULT NULL,
+    `available_at` INT UNSIGNED NOT NULL,
+    `created_at` INT UNSIGNED NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `jobs_queue_index` (`queue`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `job_batches` (
-  `id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `total_jobs` int NOT NULL,
-  `pending_jobs` int NOT NULL,
-  `failed_jobs` int NOT NULL,
-  `failed_job_ids` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `options` mediumtext COLLATE utf8mb4_unicode_ci,
-  `cancelled_at` int DEFAULT NULL,
-  `created_at` int NOT NULL,
-  `finished_at` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `id` VARCHAR(255) NOT NULL,
+    `name` VARCHAR(255) NOT NULL,
+    `total_jobs` INT NOT NULL,
+    `pending_jobs` INT NOT NULL,
+    `failed_jobs` INT NOT NULL,
+    `failed_job_ids` LONGTEXT NOT NULL,
+    `options` MEDIUMTEXT,
+    `cancelled_at` INT DEFAULT NULL,
+    `created_at` INT NOT NULL,
+    `finished_at` INT DEFAULT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `kuis_settings`
---
-
-CREATE TABLE `kuis_settings` (
-  `id` bigint UNSIGNED NOT NULL,
-  `materi_id` bigint UNSIGNED NOT NULL,
-  `id_kuis` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Kode unik kuis, contoh: KUIS-HTML-2024',
-  `waktu_per_soal` smallint UNSIGNED NOT NULL DEFAULT '30' COMMENT 'Nilai numerik waktu per soal',
-  `satuan_waktu` enum('detik','menit','jam') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'detik',
-  `kkm` tinyint UNSIGNED NOT NULL DEFAULT '70' COMMENT 'Persentase minimum jawaban benar untuk lulus, 0-100',
-  `status` enum('draft','published') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'draft',
-  `published_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `kuis_settings`
---
-
-INSERT INTO `kuis_settings` (`id`, `materi_id`, `id_kuis`, `waktu_per_soal`, `satuan_waktu`, `kkm`, `status`, `published_at`, `created_at`, `updated_at`) VALUES
-(1, 1, 'KUIS-HTML-120', 30, 'detik', 70, 'draft', NULL, '2026-09-29 19:26:33', '2026-09-29 22:55:45');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `kuis_tik`
---
-
-CREATE TABLE `kuis_tik` (
-  `id` bigint UNSIGNED NOT NULL,
-  `materi_id` bigint UNSIGNED NOT NULL,
-  `id_soal` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `pertanyaan` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `tipe` enum('pilihan_ganda','multiple_answer','essay') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pilihan_ganda',
-  `opsi_jawaban` json DEFAULT NULL,
-  `kunci_jawaban` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `penjelasan_opsi` json DEFAULT NULL,
-  `poin` int NOT NULL DEFAULT '25',
-  `urutan` int NOT NULL DEFAULT '1',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `kuis_tik`
---
-
-INSERT INTO `kuis_tik` (`id`, `materi_id`, `id_soal`, `pertanyaan`, `tipe`, `opsi_jawaban`, `kunci_jawaban`, `penjelasan_opsi`, `poin`, `urutan`, `created_at`, `updated_at`) VALUES
-(1, 1, 'KUIS-HTML-01', 'Tag HTML untuk membuat heading level 1?', 'pilihan_ganda', '[\"<h1>\", \"<h2>\", \"<title>\", \"<head>\"]', '[\"<h1>\"]', NULL, 25, 1, '2026-09-23 05:26:04', '2026-09-23 05:26:04'),
-(4, 3, 'java script-192', 'apakah yang dimaksud dengan java script', 'pilihan_ganda', '[\"A\", \"B\", \"C\", \"D\"]', '[\"A\"]', '[null, null, null, null]', 25, 1, '2026-09-29 06:15:58', '2026-09-29 06:15:58'),
-(5, 1, 'KUIS-HTML-120-02', 'APA ITU HTML', 'pilihan_ganda', '[\"A\", \"B\", \"C\", \"D\"]', '[\"B\"]', '[null, null, null, null]', 10, 2, '2026-09-29 19:27:38', '2026-09-29 23:25:49');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `lab_praktik`
---
-
-CREATE TABLE `lab_praktik` (
-  `id` bigint UNSIGNED NOT NULL,
-  `materi_id` bigint UNSIGNED NOT NULL,
-  `id_lab` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `deskripsi_kasus` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `kode_soal_awal` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `bug_target` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `solusi_fix` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `tingkat_kesulitan` enum('mudah','sedang','sulit') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'mudah',
-  `poin_max` int NOT NULL DEFAULT '100',
-  `test_cases` json DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `lab_praktik`
---
-
-INSERT INTO `lab_praktik` (`id`, `materi_id`, `id_lab`, `deskripsi_kasus`, `kode_soal_awal`, `bug_target`, `solusi_fix`, `tingkat_kesulitan`, `poin_max`, `test_cases`, `created_at`, `updated_at`) VALUES
-(1, 2, 'LAB-CSS-01', 'Fix CSS box model: padding missing, border double.', '.box { margin: 10px; padding: 20px; border: 5px solid red; }', 'padding: 20px;', '.box { margin: 10px; padding: 30px; border: 5px solid red; }', 'mudah', 100, '[\"padding: 30px;\", \"border: 5px solid red;\"]', '2026-09-23 05:26:04', '2026-09-23 05:26:04');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `materi_belajar`
---
-
-CREATE TABLE `materi_belajar` (
-  `id` bigint UNSIGNED NOT NULL,
-  `id_materi` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `guru_id` bigint UNSIGNED NOT NULL,
-  `judul` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `deskripsi` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `kategori` enum('HTML Dasar','CSS Dasar','JS Dasar','Web Responsif') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `level` enum('Pemula','Menengah','Lanjutan') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Pemula',
-  `konten` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `estimasi_waktu` int NOT NULL DEFAULT '45',
-  `tingkat_kesulitan` int NOT NULL DEFAULT '1',
-  `published` tinyint(1) NOT NULL DEFAULT '0',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `materi_belajar`
---
-
-INSERT INTO `materi_belajar` (`id`, `id_materi`, `guru_id`, `judul`, `deskripsi`, `kategori`, `level`, `konten`, `estimasi_waktu`, `tingkat_kesulitan`, `published`, `created_at`, `updated_at`) VALUES
-(1, 'MAT-HTML-01', 1, 'HTML Dasar: Struktur Dokumen & Tag Essential', 'Materi pengenalan HTML: struktur dokumen, tag HTML, heading, paragraph, link, dan gambar.', 'HTML Dasar', 'Pemula', '<p>HTML adalah bahasa markup untuk membuat struktur halaman web.</p>', 45, 1, 1, '2026-09-23 05:26:04', '2026-09-23 05:26:04'),
-(2, 'MAT-CSS-02', 1, 'CSS Dasar: Styling & Layout Box Model', 'Pengenalan CSS: syntax, selector, property, box model, margin, padding, dan display.', 'CSS Dasar', 'Pemula', '<p>CSS mengatur tampilan dan layout elemen HTML.</p>', 60, 2, 1, '2026-09-23 05:26:04', '2026-09-23 05:26:04'),
-(3, 'MAT-JS-03', 1, 'JavaScript Dasar: Variabel, Function, dan DOM', 'Pengenalan JavaScript: variabel, tipe data, function, event listener, dan DOM manipulation.', 'JS Dasar', 'Menengah', '<p>JavaScript membuat halaman web interaktif.</p>', 75, 2, 1, '2026-09-23 05:26:04', '2026-09-23 05:26:04');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `migrations`
---
-
-CREATE TABLE `migrations` (
-  `id` int UNSIGNED NOT NULL,
-  `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `batch` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `migrations`
---
-
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
-(1, '0001_01_01_000000_create_users_table', 1),
-(2, '0001_01_01_000001_create_cache_table', 1),
-(3, '0001_01_01_000002_create_jobs_table', 1),
-(4, '2026_09_23_095618_create_gurus_table', 1),
-(5, '2026_09_23_095647_create_materi_belajar_table', 1),
-(6, '2026_09_23_095649_create_progress_belajar_table', 1),
-(7, '2026_09_23_102728_add_extra_columns_to_progress_belajar', 1),
-(8, '2026_09_23_121332_create_kuis_tik_table', 1),
-(9, '2026_09_23_121332_create_lab_praktik_table', 1),
-(10, '0000_00_00_000000_create_sessions_table', 2),
-(11, '2026_09_29_032531_add_penjelasan_opsi_to_kuis_tik_table', 3),
-(12, '2026_09_29_033818_change_kunci_jawaban_to_json_in_kuis_tik', 4),
-(13, '2026_09_29_153917_create_kuis_settings_table', 5),
-(14, '2026_09_30_023334_create_attachments_table', 6),
-(15, '2026_09_30_032109_add_status_to_kuis_settings_table', 7),
-(16, '2026_09_30_065120_create_api_tokens_table', 8),
-(17, '2026_09_30_065441_add_profile_fields_to_users_table', 8),
-(18, '2026_09_30_095025_add_profile_fields_to_gurus_table', 9);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `password_reset_tokens`
---
+CREATE TABLE `failed_jobs` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `uuid` VARCHAR(255) NOT NULL,
+    `connection` TEXT NOT NULL,
+    `queue` TEXT NOT NULL,
+    `payload` LONGTEXT NOT NULL,
+    `exception` LONGTEXT NOT NULL,
+    `failed_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `password_reset_tokens` (
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `progress_belajar`
---
-
-CREATE TABLE `progress_belajar` (
-  `id` bigint UNSIGNED NOT NULL,
-  `user_id` bigint UNSIGNED NOT NULL,
-  `materi_id` bigint UNSIGNED NOT NULL,
-  `status` enum('belum_mulai','sedang_belajar','selesai') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'belum_mulai',
-  `status_selesai` tinyint(1) NOT NULL DEFAULT '0',
-  `progress_persen` int NOT NULL DEFAULT '0',
-  `persentase_selesai` int NOT NULL DEFAULT '0',
-  `skor` int DEFAULT NULL,
-  `nilai_kuis` int DEFAULT NULL,
-  `nilai_lab` int DEFAULT NULL,
-  `nilai_akhir` int DEFAULT NULL,
-  `mulai_belajar` timestamp NULL DEFAULT NULL,
-  `selesai_belajar` timestamp NULL DEFAULT NULL,
-  `catatan` text COLLATE utf8mb4_unicode_ci,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `sessions`
---
+    `email` VARCHAR(255) NOT NULL,
+    `token` VARCHAR(255) NOT NULL,
+    `created_at` TIMESTAMP NULL DEFAULT NULL,
+    PRIMARY KEY (`email`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `sessions` (
-  `id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `user_id` bigint UNSIGNED DEFAULT NULL,
-  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `user_agent` text COLLATE utf8mb4_unicode_ci,
-  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `last_activity` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `id` VARCHAR(255) NOT NULL,
+    `user_id` BIGINT UNSIGNED DEFAULT NULL,
+    `ip_address` VARCHAR(45) DEFAULT NULL,
+    `user_agent` TEXT,
+    `payload` LONGTEXT NOT NULL,
+    `last_activity` INT NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `sessions_user_id_index` (`user_id`),
+    KEY `sessions_last_activity_index` (`last_activity`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
---
--- Dumping data for table `sessions`
---
+CREATE TABLE `migrations` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `migration` VARCHAR(255) NOT NULL,
+    `batch` INT NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
-INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('vJZZklvbJpTzIVAkOSI4P9OjAHcxKIsGhf0j5Vbo', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.9444', 'eyJfdG9rZW4iOiI3VHd1c3ltcW9uSDkyZHhpcHBJbVV6WkMzcU51Yk9adUlzVE1ZVXdCIiwiX3ByZXZpb3VzIjp7InVybCI6Imh0dHA6XC9cLzEyNy4wLjAuMTo4MDAxXC9rZWxvbGEtbWF0ZXJpIiwicm91dGUiOiJrZWxvbGEubWF0ZXJpLmluZGV4In0sIl9mbGFzaCI6eyJvbGQiOlsiX29sZF9pbnB1dCIsImVycm9ycyJdLCJuZXciOltdfSwibG9naW5fZ3VydV81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjoxLCJfb2xkX2lucHV0Ijp7ImRlc2tyaXBzaSI6IlRlc3RpbmcgUE9TVCIsImVzdGltYXNpX3dha3R1IjoiMjQwIiwibGV2ZWwiOiI0IiwianVkdWwiOiJQSFAgQmFja2VuZCBUZXN0IiwiX3Rva2VuIjoiN1R3dXN5bXFvbkg5MmR4aXBwSW1VelpDM3FOdWJPWnVJc1RNWVV3QiJ9LCJlcnJvcnMiOnsiZGVmYXVsdCI6eyJmb3JtYXQiOiI6bWVzc2FnZSIsIm1lc3NhZ2VzIjp7ImlkX21hdGVyaSI6WyJUaGUgaWQgbWF0ZXJpIGZpZWxkIGlzIHJlcXVpcmVkLiJdLCJrYXRlZ29yaSI6WyJUaGUga2F0ZWdvcmkgZmllbGQgaXMgcmVxdWlyZWQuIl0sImxldmVsIjpbIlRoZSBzZWxlY3RlZCBsZXZlbCBpcyBpbnZhbGlkLiJdLCJrb250ZW4iOlsiVGhlIGtvbnRlbiBmaWVsZCBpcyByZXF1aXJlZC4iXX19fX0=', 1790167978);
+-- =====================================================================
+-- 3. DATA AWAL
+-- (tabel sessions tidak disertakan; remember_token dikosongkan)
+-- =====================================================================
 
--- --------------------------------------------------------
+INSERT INTO
+    `gurus` (
+        `id`,
+        `nip`,
+        `name`,
+        `email`,
+        `password`,
+        `role`,
+        `sekolah`,
+        `foto_profil`,
+        `tahun_ajaran`,
+        `semester`,
+        `mata_pelajaran`,
+        `no_hp`,
+        `active`,
+        `last_login`,
+        `remember_token`,
+        `created_at`,
+        `updated_at`
+    )
+VALUES (
+        1,
+        '198512051234567890',
+        'Siti Nurhaliza',
+        'siti.nurhaliza@sekolah.sch.id',
+        '$2y$12$qG5iSIzz9bNwW.vmJnm4ROV/HmbYkJ2O1EmXEywJPR9PxmpvGbhv2',
+        'teacher',
+        'SMAN 1 Jakarta Pusat',
+        NULL,
+        '2024/2025',
+        'Ganjil',
+        'Teknologi Informasi & Komunikasi',
+        NULL,
+        1,
+        NULL,
+        NULL,
+        '2026-09-23 05:26:02',
+        '2026-09-23 05:26:02'
+    ),
+    (
+        2,
+        '198703151098765432',
+        'Ahmad Hidayat',
+        'ahmad.hidayat@sekolah.sch.id',
+        '$2y$12$M6w4giAMoun0MvNMvhzNGOoJbJKCG/TzC7ntq9WWlaK7xZLPPCNVa',
+        'lab_admin',
+        'SMAN 1 Jakarta Pusat',
+        NULL,
+        '2024/2025',
+        'Ganjil',
+        'Teknologi Informasi & Komunikasi',
+        NULL,
+        1,
+        NULL,
+        NULL,
+        '2026-09-23 05:26:03',
+        '2026-09-23 05:26:03'
+    );
 
---
--- Table structure for table `users`
---
+INSERT INTO
+    `materi_belajar` (
+        `id`,
+        `id_materi`,
+        `guru_id`,
+        `judul`,
+        `deskripsi`,
+        `kategori`,
+        `level`,
+        `konten`,
+        `estimasi_waktu`,
+        `tingkat_kesulitan`,
+        `published`,
+        `created_at`,
+        `updated_at`
+    )
+VALUES (
+        1,
+        'MAT-HTML-01',
+        1,
+        'HTML Dasar: Struktur Dokumen & Tag Essential',
+        'Materi pengenalan HTML: struktur dokumen, tag HTML, heading, paragraph, link, dan gambar.',
+        'HTML Dasar',
+        'Pemula',
+        '<p>HTML adalah bahasa markup untuk membuat struktur halaman web.</p>',
+        45,
+        1,
+        1,
+        '2026-09-23 05:26:04',
+        '2026-09-23 05:26:04'
+    ),
+    (
+        2,
+        'MAT-CSS-02',
+        1,
+        'CSS Dasar: Styling & Layout Box Model',
+        'Pengenalan CSS: syntax, selector, property, box model, margin, padding, dan display.',
+        'CSS Dasar',
+        'Pemula',
+        '<p>CSS mengatur tampilan dan layout elemen HTML.</p>',
+        60,
+        2,
+        1,
+        '2026-09-23 05:26:04',
+        '2026-09-23 05:26:04'
+    ),
+    (
+        3,
+        'MAT-JS-03',
+        1,
+        'JavaScript Dasar: Variabel, Function, dan DOM',
+        'Pengenalan JavaScript: variabel, tipe data, function, event listener, dan DOM manipulation.',
+        'JS Dasar',
+        'Menengah',
+        '<p>JavaScript membuat halaman web interaktif.</p>',
+        75,
+        2,
+        1,
+        '2026-09-23 05:26:04',
+        '2026-09-23 05:26:04'
+    );
 
-CREATE TABLE `users` (
-  `id` bigint UNSIGNED NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `kelas` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `no_hp` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `foto_profil` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `active` tinyint(1) NOT NULL DEFAULT '1',
-  `last_login` timestamp NULL DEFAULT NULL,
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email_verified_at` timestamp NULL DEFAULT NULL,
-  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+INSERT INTO
+    `kuis_settings` (
+        `id`,
+        `materi_id`,
+        `id_kuis`,
+        `waktu_per_soal`,
+        `satuan_waktu`,
+        `kkm`,
+        `status`,
+        `published_at`,
+        `created_at`,
+        `updated_at`
+    )
+VALUES (
+        1,
+        1,
+        'KUIS-HTML-120',
+        30,
+        'detik',
+        70,
+        'draft',
+        NULL,
+        '2026-09-29 19:26:33',
+        '2026-09-29 22:55:45'
+    );
 
---
--- Indexes for dumped tables
---
+INSERT INTO
+    `kuis_tik` (
+        `id`,
+        `materi_id`,
+        `id_soal`,
+        `pertanyaan`,
+        `tipe`,
+        `opsi_jawaban`,
+        `kunci_jawaban`,
+        `penjelasan_opsi`,
+        `poin`,
+        `urutan`,
+        `created_at`,
+        `updated_at`
+    )
+VALUES (
+        1,
+        1,
+        'KUIS-HTML-01',
+        'Tag HTML untuk membuat heading level 1?',
+        'pilihan_ganda',
+        '["<h1>", "<h2>", "<title>", "<head>"]',
+        '["<h1>"]',
+        NULL,
+        25,
+        1,
+        '2026-09-23 05:26:04',
+        '2026-09-23 05:26:04'
+    ),
+    (
+        4,
+        3,
+        'java script-192',
+        'apakah yang dimaksud dengan java script',
+        'pilihan_ganda',
+        '["A", "B", "C", "D"]',
+        '["A"]',
+        '[null, null, null, null]',
+        25,
+        1,
+        '2026-09-29 06:15:58',
+        '2026-09-29 06:15:58'
+    ),
+    (
+        5,
+        1,
+        'KUIS-HTML-120-02',
+        'APA ITU HTML',
+        'pilihan_ganda',
+        '["A", "B", "C", "D"]',
+        '["B"]',
+        '[null, null, null, null]',
+        10,
+        2,
+        '2026-09-29 19:27:38',
+        '2026-09-29 23:25:49'
+    );
 
---
--- Indexes for table `api_tokens`
---
-ALTER TABLE `api_tokens`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `api_tokens_token_unique` (`token`),
-  ADD KEY `api_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`);
+INSERT INTO
+    `lab_praktik` (
+        `id`,
+        `materi_id`,
+        `id_lab`,
+        `deskripsi_kasus`,
+        `kode_soal_awal`,
+        `bug_target`,
+        `solusi_fix`,
+        `tingkat_kesulitan`,
+        `poin_max`,
+        `test_cases`,
+        `created_at`,
+        `updated_at`
+    )
+VALUES (
+        1,
+        2,
+        'LAB-CSS-01',
+        'Fix CSS box model: padding missing, border double.',
+        '.box { margin: 10px; padding: 20px; border: 5px solid red; }',
+        'padding: 20px;',
+        '.box { margin: 10px; padding: 30px; border: 5px solid red; }',
+        'mudah',
+        100,
+        '["padding: 30px;", "border: 5px solid red;"]',
+        '2026-09-23 05:26:04',
+        '2026-09-23 05:26:04'
+    );
 
---
--- Indexes for table `attachments`
---
-ALTER TABLE `attachments`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `attachments_attachable_type_attachable_id_index` (`attachable_type`,`attachable_id`);
+INSERT INTO
+    `migrations` (`id`, `migration`, `batch`)
+VALUES (
+        1,
+        '0001_01_01_000000_create_users_table',
+        1
+    ),
+    (
+        2,
+        '0001_01_01_000001_create_cache_table',
+        1
+    ),
+    (
+        3,
+        '0001_01_01_000002_create_jobs_table',
+        1
+    ),
+    (
+        4,
+        '2026_09_23_095618_create_gurus_table',
+        1
+    ),
+    (
+        5,
+        '2026_09_23_095647_create_materi_belajar_table',
+        1
+    ),
+    (
+        6,
+        '2026_09_23_095649_create_progress_belajar_table',
+        1
+    ),
+    (
+        7,
+        '2026_09_23_102728_add_extra_columns_to_progress_belajar',
+        1
+    ),
+    (
+        8,
+        '2026_09_23_121332_create_kuis_tik_table',
+        1
+    ),
+    (
+        9,
+        '2026_09_23_121332_create_lab_praktik_table',
+        1
+    ),
+    (
+        10,
+        '0000_00_00_000000_create_sessions_table',
+        2
+    ),
+    (
+        11,
+        '2026_09_29_032531_add_penjelasan_opsi_to_kuis_tik_table',
+        3
+    ),
+    (
+        12,
+        '2026_09_29_033818_change_kunci_jawaban_to_json_in_kuis_tik',
+        4
+    ),
+    (
+        13,
+        '2026_09_29_153917_create_kuis_settings_table',
+        5
+    ),
+    (
+        14,
+        '2026_09_30_023334_create_attachments_table',
+        6
+    ),
+    (
+        15,
+        '2026_09_30_032109_add_status_to_kuis_settings_table',
+        7
+    ),
+    (
+        16,
+        '2026_09_30_065120_create_api_tokens_table',
+        8
+    ),
+    (
+        17,
+        '2026_09_30_065441_add_profile_fields_to_users_table',
+        8
+    ),
+    (
+        18,
+        '2026_09_30_095025_add_profile_fields_to_gurus_table',
+        9
+    );
 
---
--- Indexes for table `cache`
---
-ALTER TABLE `cache`
-  ADD PRIMARY KEY (`key`),
-  ADD KEY `cache_expiration_index` (`expiration`);
+-- Reset auto increment sesuai data
+ALTER TABLE `gurus` AUTO_INCREMENT = 3;
 
---
--- Indexes for table `cache_locks`
---
-ALTER TABLE `cache_locks`
-  ADD PRIMARY KEY (`key`),
-  ADD KEY `cache_locks_expiration_index` (`expiration`);
+ALTER TABLE `materi_belajar` AUTO_INCREMENT = 4;
 
---
--- Indexes for table `failed_jobs`
---
-ALTER TABLE `failed_jobs`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`),
-  ADD KEY `failed_jobs_connection_queue_failed_at_index` (`connection`,`queue`,`failed_at`);
+ALTER TABLE `kuis_settings` AUTO_INCREMENT = 2;
 
---
--- Indexes for table `gurus`
---
-ALTER TABLE `gurus`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `gurus_nip_unique` (`nip`),
-  ADD UNIQUE KEY `gurus_email_unique` (`email`);
+ALTER TABLE `kuis_tik` AUTO_INCREMENT = 6;
 
---
--- Indexes for table `jobs`
---
-ALTER TABLE `jobs`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `jobs_queue_index` (`queue`);
+ALTER TABLE `lab_praktik` AUTO_INCREMENT = 2;
 
---
--- Indexes for table `job_batches`
---
-ALTER TABLE `job_batches`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE `migrations` AUTO_INCREMENT = 19;
 
---
--- Indexes for table `kuis_settings`
---
-ALTER TABLE `kuis_settings`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `kuis_settings_materi_id_unique` (`materi_id`),
-  ADD UNIQUE KEY `kuis_settings_id_kuis_unique` (`id_kuis`);
-
---
--- Indexes for table `kuis_tik`
---
-ALTER TABLE `kuis_tik`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `kuis_tik_id_soal_unique` (`id_soal`),
-  ADD KEY `kuis_tik_materi_id_foreign` (`materi_id`);
-
---
--- Indexes for table `lab_praktik`
---
-ALTER TABLE `lab_praktik`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `lab_praktik_id_lab_unique` (`id_lab`),
-  ADD KEY `lab_praktik_materi_id_foreign` (`materi_id`);
-
---
--- Indexes for table `materi_belajar`
---
-ALTER TABLE `materi_belajar`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `materi_belajar_id_materi_unique` (`id_materi`),
-  ADD KEY `materi_belajar_guru_id_foreign` (`guru_id`);
-
---
--- Indexes for table `migrations`
---
-ALTER TABLE `migrations`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `password_reset_tokens`
---
-ALTER TABLE `password_reset_tokens`
-  ADD PRIMARY KEY (`email`);
-
---
--- Indexes for table `progress_belajar`
---
-ALTER TABLE `progress_belajar`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `progress_belajar_user_id_materi_id_unique` (`user_id`,`materi_id`),
-  ADD KEY `progress_belajar_materi_id_foreign` (`materi_id`);
-
---
--- Indexes for table `sessions`
---
-ALTER TABLE `sessions`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `sessions_user_id_index` (`user_id`),
-  ADD KEY `sessions_last_activity_index` (`last_activity`);
-
---
--- Indexes for table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `users_email_unique` (`email`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `api_tokens`
---
-ALTER TABLE `api_tokens`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `attachments`
---
-ALTER TABLE `attachments`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `failed_jobs`
---
-ALTER TABLE `failed_jobs`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `gurus`
---
-ALTER TABLE `gurus`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `jobs`
---
-ALTER TABLE `jobs`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `kuis_settings`
---
-ALTER TABLE `kuis_settings`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `kuis_tik`
---
-ALTER TABLE `kuis_tik`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `lab_praktik`
---
-ALTER TABLE `lab_praktik`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `materi_belajar`
---
-ALTER TABLE `materi_belajar`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT for table `migrations`
---
-ALTER TABLE `migrations`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
-
---
--- AUTO_INCREMENT for table `progress_belajar`
---
-ALTER TABLE `progress_belajar`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `users`
---
-ALTER TABLE `users`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `kuis_settings`
---
-ALTER TABLE `kuis_settings`
-  ADD CONSTRAINT `kuis_settings_materi_id_foreign` FOREIGN KEY (`materi_id`) REFERENCES `materi_belajar` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `kuis_tik`
---
-ALTER TABLE `kuis_tik`
-  ADD CONSTRAINT `kuis_tik_materi_id_foreign` FOREIGN KEY (`materi_id`) REFERENCES `materi_belajar` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `lab_praktik`
---
-ALTER TABLE `lab_praktik`
-  ADD CONSTRAINT `lab_praktik_materi_id_foreign` FOREIGN KEY (`materi_id`) REFERENCES `materi_belajar` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `materi_belajar`
---
-ALTER TABLE `materi_belajar`
-  ADD CONSTRAINT `materi_belajar_guru_id_foreign` FOREIGN KEY (`guru_id`) REFERENCES `gurus` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `progress_belajar`
---
-ALTER TABLE `progress_belajar`
-  ADD CONSTRAINT `progress_belajar_materi_id_foreign` FOREIGN KEY (`materi_id`) REFERENCES `materi_belajar` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `progress_belajar_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+SET FOREIGN_KEY_CHECKS = 1;

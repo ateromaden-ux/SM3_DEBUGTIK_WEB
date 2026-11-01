@@ -110,20 +110,18 @@
                         @if($materi->deskripsi)
                         <p class="font-body-sm text-body-sm text-on-surface-variant mt-space-2xs line-clamp-1">{{ $materi->deskripsi }}</p>
                         @endif
-                        <div class="flex items-center gap-space-md mt-space-xs">
-                            <span class="flex items-center gap-space-2xs {{ $jumlahSoal > 0 ? 'text-secondary' : 'text-outline' }}">
-                                <span class="material-symbols-outlined text-[14px]">quiz</span>
-                                <span class="font-label-badge text-label-badge">{{ $jumlahSoal }} soal</span>
-                            </span>
-                            <span class="flex items-center gap-space-2xs {{ $jumlahLab > 0 ? 'text-tertiary' : 'text-outline' }}">
-                                <span class="material-symbols-outlined text-[14px]">terminal</span>
-                                <span class="font-label-badge text-label-badge">{{ $jumlahLab }} lab</span>
-                            </span>
-                        </div>
                     </div>
 
                     {{-- Tombol aksi --}}
                     <div class="flex items-center gap-space-xs flex-shrink-0">
+                        {{-- Lihat file lampiran --}}
+                        <button
+                            type="button"
+                            title="Lihat file lampiran"
+                            onclick="lihatFileLampiran('{{ $materi->id }}', '{{ addslashes($materi->judul) }}')"
+                            class="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-secondary/10 hover:text-secondary transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">folder_open</span>
+                        </button>
                         {{-- Edit materi --}}
                         <button
                             type="button"

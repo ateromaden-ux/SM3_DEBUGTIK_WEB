@@ -6,14 +6,6 @@
 {{-- Header daftar soal --}}
 <div class="flex items-center justify-between px-space-md py-space-sm border-b border-outline-variant/20 flex-shrink-0">
     <span class="font-title-sm text-title-sm font-bold text-on-surface">Daftar Soal</span>
-    <button onclick="newSoal()"
-        id="btn-soal-baru"
-        class="flex items-center gap-space-2xs px-space-sm py-space-2xs rounded-lg bg-secondary text-on-secondary font-body-sm text-body-sm font-semibold hover:opacity-90 transition-opacity {{ (!$settings || $settings->isPublished()) ? 'opacity-50 cursor-not-allowed' : '' }}"
-        {{ (!$settings || $settings->isPublished()) ? 'disabled' : '' }}
-        title="{{ !$settings ? 'Atur pengaturan kuis dulu' : ($settings->isPublished() ? 'Tarik ke Draft untuk menambah soal' : '') }}">
-        <span class="material-symbols-outlined text-[16px]">add</span>
-        Soal Baru
-    </button>
 </div>
 
 {{-- List soal --}}
@@ -53,7 +45,13 @@
                 <p class="font-body-sm text-body-sm text-on-surface mt-space-xs line-clamp-2">{{ $soal->pertanyaan }}</p>
                 <div class="flex items-center justify-between mt-space-xs">
                     <span class="font-code-inline text-code-inline text-outline">{{ $soal->id_soal }}</span>
-                    <span class="font-label-badge text-label-badge text-on-surface-variant">{{ $soal->poin }} poin</span>
+                    <div class="flex items-center gap-space-md">
+                        <span class="font-label-badge text-label-badge text-on-surface-variant flex items-center gap-space-2xs">
+                            <span class="material-symbols-outlined text-[12px]">timer</span>
+                            {{ $soal->waktu ?? 30 }}s
+                        </span>
+                        <span class="font-label-badge text-label-badge text-on-surface-variant">{{ $soal->poin }} poin</span>
+                    </div>
                 </div>
             </div>
         @empty

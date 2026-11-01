@@ -33,9 +33,14 @@ class Attachment extends Model
     public function getUkuranReadableAttribute(): string
     {
         $bytes = $this->ukuran;
-        if ($bytes < 1024)       return $bytes . ' B';
-        if ($bytes < 1048576)    return round($bytes / 1024, 1) . ' KB';
-        return round($bytes / 1048576, 1) . ' MB';
+        if ($bytes < 1024) {
+            return $bytes.' B';
+        }
+        if ($bytes < 1048576) {
+            return round($bytes / 1024, 1).' KB';
+        }
+
+        return round($bytes / 1048576, 1).' MB';
     }
 
     // Apakah file ini gambar
@@ -53,8 +58,13 @@ class Attachment extends Model
     // Icon material symbols berdasarkan tipe
     public function getIconAttribute(): string
     {
-        if ($this->isPdf())   return 'picture_as_pdf';
-        if ($this->isImage()) return 'image';
+        if ($this->isPdf()) {
+            return 'picture_as_pdf';
+        }
+        if ($this->isImage()) {
+            return 'image';
+        }
+
         return 'attach_file';
     }
 }

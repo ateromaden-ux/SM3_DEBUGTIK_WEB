@@ -9,20 +9,21 @@ class KuisSettings extends Model
     protected $table = 'kuis_settings';
 
     protected $fillable = [
-        'materi_id',
+        'guru_id',
+        'nama_kuis',
+        'deskripsi',
         'id_kuis',
-        'waktu_per_soal',
-        'satuan_waktu',
         'kkm',
         'status',
         'published_at',
     ];
 
     protected $casts = [
-        'waktu_per_soal' => 'integer',
         'kkm' => 'integer',
         'published_at' => 'datetime',
     ];
+
+    // ─── Helpers ──────────────────────────────────────────────────────────────
 
     public function isPublished(): bool
     {
@@ -34,21 +35,31 @@ class KuisSettings extends Model
         return $this->status === 'draft';
     }
 
-    // Relasi ke MateriBelajar
+    /**
+     * Nama tampilan kuis — pakai nama_kuis jika ada, fallback ke id_kuis.
+     */
+    public function getNamaDisplayAttribute(): string
+    {
+        return $this->nama_kuis ?? $this->id_kuis;
+    }
+
+    // ─── Relasi ───────────────────────────────────────────────────────────────
+
+    /** Kuis bisa terikat ke materi (opsional). */
     public function materi()
     {
         return $this->belongsTo(MateriBelajar::class, 'materi_id');
     }
 
-    /**
-     * Konversi waktu_per_soal ke detik (untuk frontend timer).
-     */
-    public function waktuDalamDetik(): int
+    /** Kuis selalu dimiliki guru. */
+    public function guru()
     {
-        return match ($this->satuan_waktu) {
-            'menit' => $this->waktu_per_soal * 60,
-            'jam' => $this->waktu_per_soal * 3600,
-            default => $this->waktu_per_soal,
-        };
+        return $this->belongsTo(Guru::class, 'guru_id');
+    }
+
+    /** Soal-soal milik kuis ini. */
+    public function soal()
+    {
+        return $this->hasMany(KuisTik::class, 'kuis_settings_id');
     }
 }

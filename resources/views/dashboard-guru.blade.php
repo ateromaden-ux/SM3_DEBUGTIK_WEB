@@ -36,6 +36,7 @@
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
     @include('layouts.partials.tailwind-config')
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <title>Dasbor Guru - DebugTIK</title>
 </head>
 <body class="bg-surface font-body-md text-body-md text-on-surface">
@@ -62,6 +63,9 @@
 
 {{-- ── Modal Lab Praktik ── --}}
 @include('dashboard.modals.modal-lab')
+
+{{-- ── Modal File Viewer ── --}}
+@include('dashboard.modals.modal-file-viewer')
 
 {{-- ── JavaScript: shared utilities + logika halaman dashboard ── --}}
 <script src="{{ asset('js/app.js') }}"></script>

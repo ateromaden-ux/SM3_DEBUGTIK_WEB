@@ -1,6 +1,6 @@
 {{--
     Header bar — halaman Kelola Soal Kuis.
-    Variabel: $materi, $settings, $soalList, $guru
+    Variabel: $settings, $soalList, $guru, $judulKuis
 --}}
 <header class="flex-shrink-0 h-16 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-space-lg flex items-center justify-between">
 
@@ -9,7 +9,7 @@
         <span class="material-symbols-outlined text-secondary text-[22px]">quiz</span>
         <div class="flex flex-col leading-none">
             <span class="font-title-sm text-title-sm font-bold text-on-surface">Kelola Soal Kuis</span>
-            <span class="font-body-sm text-body-sm text-on-surface-variant">{{ $materi->judul }}</span>
+            <span class="font-body-sm text-body-sm text-on-surface-variant">{{ $judulKuis }}</span>
         </div>
 
         {{-- Badge status: Published / Draft --}}

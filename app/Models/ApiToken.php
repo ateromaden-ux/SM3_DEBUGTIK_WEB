@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 
 class ApiToken extends Model
 {
@@ -21,7 +20,7 @@ class ApiToken extends Model
 
     protected $casts = [
         'last_used_at' => 'datetime',
-        'expires_at'   => 'datetime',
+        'expires_at' => 'datetime',
     ];
 
     protected $hidden = ['token'];
@@ -44,6 +43,7 @@ class ApiToken extends Model
         if ($this->expires_at && $this->expires_at->isPast()) {
             return false;
         }
+
         return true;
     }
 }

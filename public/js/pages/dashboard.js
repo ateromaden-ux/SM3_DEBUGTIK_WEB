@@ -76,6 +76,66 @@ document.querySelectorAll('[data-tab]').forEach(tab => {
 const tabParam = new URLSearchParams(window.location.search).get('tab');
 switchTab(tabParam || 'dashboard');
 
+// ─── FILE VIEWER LAMPIRAN MATERI ─────────────────────────────────────────────
+function lihatFileLampiran(materiId, judulMateri) {
+    const modal  = document.getElementById('file-viewer-modal');
+    const body   = document.getElementById('file-viewer-body');
+    const judul  = document.getElementById('file-viewer-judul');
+    const loading = document.getElementById('file-viewer-loading');
+
+    judul.textContent = judulMateri;
+    body.innerHTML = '';
+    body.appendChild(loading);
+    loading.classList.remove('hidden');
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    fetch(`/api/attachment/materi/${materiId}`, { headers: { 'X-CSRF-TOKEN': CSRF } })
+        .then(r => r.json())
+        .then(data => {
+            body.innerHTML = '';
+            if (!data.success || !data.data.length) {
+                body.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-12 gap-space-sm text-center">
+                        <span class="material-symbols-outlined text-outline text-[36px]">folder_off</span>
+                        <p class="font-body-sm text-body-sm text-outline">Belum ada file lampiran untuk materi ini.</p>
+                    </div>`;
+                return;
+            }
+            data.data.forEach(f => {
+                const isImage = f.is_image;
+                const isPdf   = f.is_pdf;
+                const icon    = isImage ? 'image' : (isPdf ? 'picture_as_pdf' : 'description');
+                const color   = isImage ? 'text-primary' : (isPdf ? 'text-error' : 'text-secondary');
+
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-space-sm px-space-sm py-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors';
+                div.innerHTML = `
+                    <span class="material-symbols-outlined ${color} text-[24px] flex-shrink-0">${icon}</span>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-body-sm text-body-sm text-on-surface font-semibold truncate">${f.nama_file}</p>
+                        <p class="font-label-badge text-label-badge text-outline">${f.ukuran_readable}</p>
+                    </div>
+                    <a href="${f.url}" target="_blank"
+                        class="flex items-center gap-space-2xs px-space-sm py-space-xs rounded-lg bg-surface-container hover:bg-primary/10 hover:text-primary text-on-surface-variant font-body-sm text-body-sm transition-colors flex-shrink-0">
+                        <span class="material-symbols-outlined text-[16px]">${isImage ? 'open_in_new' : 'download'}</span>
+                        ${isImage ? 'Buka' : 'Unduh'}
+                    </a>`;
+                body.appendChild(div);
+            });
+        })
+        .catch(() => {
+            body.innerHTML = `<p class="font-body-sm text-body-sm text-error text-center py-8">Gagal memuat file.</p>`;
+        });
+}
+
+function tutupFileViewer() {
+    const modal = document.getElementById('file-viewer-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
 // ─── MODAL MATERI ─────────────────────────────────────────────────────────────
 function toggleModal(open) {
     const modal = document.getElementById('materi-modal');
@@ -148,7 +208,6 @@ function handleMateriSubmit(e) {
         judul:          document.getElementById('input-judul-materi').value,
         kategori:       document.getElementById('input-kategori').value,
         level:          document.getElementById('input-level-materi').value,
-        estimasi_waktu: document.getElementById('input-estimasi-waktu').value,
         deskripsi:      document.getElementById('input-deskripsi').value,
     };
 
@@ -202,6 +261,17 @@ function handleMateriDrop(e) {
 
 function handleMateriFileSelect(files) {
     Array.from(files).forEach(f => _materiPendingFiles.push(f));
+
+    // Validasi total ukuran ≤ 20MB
+    const totalBytes = _materiPendingFiles.reduce((sum, f) => sum + f.size, 0);
+    if (totalBytes > 20 * 1024 * 1024) {
+        // Hapus file yang baru ditambah sampai total ≤ 20MB
+        while (_materiPendingFiles.reduce((s, f) => s + f.size, 0) > 20 * 1024 * 1024) {
+            _materiPendingFiles.pop();
+        }
+        showToast('Total ukuran file tidak boleh melebihi 20 MB.', 'error');
+    }
+
     renderMateriFilePreview();
 }
 

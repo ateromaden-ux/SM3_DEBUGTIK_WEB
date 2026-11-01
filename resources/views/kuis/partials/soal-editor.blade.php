@@ -22,7 +22,8 @@
 
     <div class="ml-auto flex items-center gap-space-xs">
         <label class="font-label-badge text-label-badge uppercase text-outline whitespace-nowrap">Poin:</label>
-        <input id="f-poin" type="number" min="1" max="200" value="25"
+        <input id="f-poin" type="number" min="1" max="100" value="25"
+            oninput="if(this.value > 100) this.value = 100; if(this.value < 1 && this.value !== '') this.value = 1;"
             class="w-16 h-8 px-space-xs rounded-lg bg-surface-container-low border border-outline-variant/40 font-code-inline text-code-inline text-on-surface text-center focus:outline-none focus:border-secondary"/>
     </div>
 </div>
@@ -52,7 +53,7 @@
     <div id="soal-form-wrapper" class="hidden flex-col h-full">
         <form id="soal-form" onsubmit="handleSimpan(event)" class="flex flex-col h-full">
             <input type="hidden" id="f-db-id" value=""/>
-            <input type="hidden" id="f-materi-id" value="{{ $materi->id }}"/>
+            <input type="hidden" id="f-kuis-settings-id" value="{{ $settings->id }}"/>
             <input type="hidden" id="f-tipe" value="pilihan_ganda"/>
             <input type="hidden" id="f-kunci" value=""/>
 
@@ -66,6 +67,17 @@
                     <textarea id="f-pertanyaan" required rows="3"
                         placeholder="Tulis pertanyaan di sini..."
                         class="w-full px-space-md py-space-sm rounded-2xl bg-surface border-2 border-outline-variant/30 focus:border-secondary focus:outline-none font-body-lg text-body-lg text-on-surface shadow-sm resize-none transition-colors placeholder:text-outline/50"></textarea>
+
+                    <div class="flex items-center gap-space-md mt-space-sm">
+                        <input id="f-id-soal" type="hidden" value=""/>
+                        <div class="flex items-center gap-space-xs ml-auto">
+                            <span class="material-symbols-outlined text-outline text-[14px]">timer</span>
+                            <span class="font-label-badge text-label-badge uppercase text-outline">Waktu:</span>
+                            <input id="f-waktu" type="number" min="1" max="3600" value="30"
+                                class="w-20 h-8 px-space-xs rounded-lg bg-surface-container-low border border-outline-variant/40 font-code-inline text-code-inline text-on-surface text-center focus:outline-none focus:border-secondary"/>
+                            <span class="font-body-sm text-body-sm text-on-surface-variant">detik</span>
+                        </div>
+                    </div>
 
                     <div class="flex items-center gap-space-md mt-space-sm">
                         <div class="flex items-center gap-space-xs">

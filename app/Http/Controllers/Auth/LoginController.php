@@ -24,7 +24,7 @@ class LoginController extends Controller
         // Coba login sebagai Guru (teacher/lab_admin)
         if (Auth::guard('guru')->attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
-            
+
             return redirect()->intended('/dashboard');
         }
 

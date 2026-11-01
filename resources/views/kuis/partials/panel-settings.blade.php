@@ -32,7 +32,7 @@
     {{-- Form pengaturan (collapsed jika sudah ada settings) --}}
     <div id="settings-panel" class="{{ $settings ? 'hidden' : 'flex' }} flex-col gap-space-sm px-space-md pb-space-md pt-space-xs">
         <form id="settings-form" onsubmit="saveSettings(event)">
-            <input type="hidden" id="s-materi-id" value="{{ $materi->id }}"/>
+            <input type="hidden" id="s-settings-id" value="{{ $settings?->id ?? '' }}"/>
 
             {{-- Lock banner saat published --}}
             @if($settings && $settings->isPublished())
@@ -60,25 +60,7 @@
                 <p class="font-body-sm text-body-sm text-outline">ID ini dipakai sebagai prefix semua soal.</p>
             </div>
 
-            {{-- Waktu per soal --}}
-            <div class="flex flex-col gap-space-2xs mb-space-sm">
-                <label class="font-label-badge text-label-badge uppercase text-outline">
-                    Waktu Per Soal <span class="text-error">*</span>
-                </label>
-                <div class="flex gap-space-xs">
-                    <input id="s-waktu" type="number" min="1" max="3600" required
-                        value="{{ $settings?->waktu_per_soal ?? 30 }}"
-                        {{ $settings?->isPublished() ? 'disabled' : '' }}
-                        class="flex-1 h-10 px-space-sm rounded-xl bg-surface-container-low border border-outline-variant/30 font-code-inline text-code-inline text-on-surface focus:outline-none focus:border-secondary text-center disabled:opacity-50 disabled:cursor-not-allowed"/>
-                    <select id="s-satuan"
-                        {{ $settings?->isPublished() ? 'disabled' : '' }}
-                        class="w-24 h-10 px-space-xs rounded-xl bg-surface-container-low border border-outline-variant/30 font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-secondary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
-                        <option value="detik" {{ ($settings?->satuan_waktu ?? 'detik') === 'detik' ? 'selected' : '' }}>Detik</option>
-                        <option value="menit" {{ ($settings?->satuan_waktu) === 'menit' ? 'selected' : '' }}>Menit</option>
-                        <option value="jam"   {{ ($settings?->satuan_waktu) === 'jam'   ? 'selected' : '' }}>Jam</option>
-                    </select>
-                </div>
-            </div>
+
 
             {{-- KKM --}}
             <div class="flex flex-col gap-space-2xs mb-space-md">
@@ -114,10 +96,6 @@
         <div class="flex items-center gap-space-xs">
             <span class="material-symbols-outlined text-outline text-[14px]">badge</span>
             <span class="font-code-inline text-code-inline text-on-surface font-semibold">{{ $settings->id_kuis }}</span>
-        </div>
-        <div class="flex items-center gap-space-2xs text-on-surface-variant">
-            <span class="material-symbols-outlined text-[14px]">timer</span>
-            <span class="font-body-sm text-body-sm">{{ $settings->waktu_per_soal }} {{ $settings->satuan_waktu }}</span>
         </div>
         <div class="flex items-center gap-space-2xs text-on-surface-variant">
             <span class="material-symbols-outlined text-[14px]">school</span>

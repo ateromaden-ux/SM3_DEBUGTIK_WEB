@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\MateriBelajar;
 use App\Models\KuisTik;
 use App\Models\LabPraktik;
+use App\Models\MateriBelajar;
 use Illuminate\Database\Seeder;
 
 class MateriBelajarSeeder extends Seeder

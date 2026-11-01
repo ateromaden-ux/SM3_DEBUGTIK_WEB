@@ -87,7 +87,7 @@
                     <span class="font-body-sm text-body-sm text-on-surface-variant">
                         Drag & drop file di sini, atau <span class="text-primary font-semibold">klik untuk pilih</span>
                     </span>
-                    <span class="font-label-badge text-label-badge text-outline">PDF, JPG, PNG, DOCX · Maks 20 MB per file</span>
+                    <span class="font-label-badge text-label-badge text-outline">PDF, JPG, PNG, DOCX · Total maks 20 MB</span>
                     <input type="file" id="materi-file-input" class="hidden" multiple
                            accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.ppt,.pptx"
                            onchange="handleMateriFileSelect(this.files)"/>

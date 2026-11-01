@@ -8,7 +8,6 @@ use App\Http\Requests\UpdateKuisRequest;
 use App\Models\Guru;
 use App\Models\KuisSettings;
 use App\Models\KuisTik;
-use App\Models\MateriBelajar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,40 +16,42 @@ class KuisTikController extends Controller
     // ─── HALAMAN ──────────────────────────────────────────────────────────────
 
     /**
-     * GET /kuis/{materi}
-     * Halaman fullpage kelola soal kuis untuk satu materi.
+     * GET /kuis/{settings}
+     * Halaman fullpage kelola soal kuis — bisa dari materi atau standalone.
      */
-    public function showPage(MateriBelajar $materi)
+    public function showPage(KuisSettings $settings)
     {
         $guru = Auth::guard('guru')->user() ?? Guru::first();
 
-        $soalList = KuisTik::where('materi_id', $materi->id)
-            ->orderBy('urutan')
-            ->get();
+        // Load soal — bisa via materi_id (legacy) atau kuis_settings_id (standalone)
+        $soalList = KuisTik::where(function ($q) use ($settings) {
+            $q->where('kuis_settings_id', $settings->id)
+                ->orWhere(function ($q2) use ($settings) {
+                    if ($settings->materi_id) {
+                        $q2->where('materi_id', $settings->materi_id)
+                            ->whereNull('kuis_settings_id');
+                    }
+                });
+        })->orderBy('urutan')->get();
 
-        $allMateri = MateriBelajar::where('guru_id', $guru->id)
-            ->with(['kuis', 'kuisSettings'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        // Judul halaman — pakai nama_kuis atau judul materi
+        $judulKuis = $settings->nama_kuis
+            ?? $settings->materi?->judul
+            ?? 'Kuis';
 
-        $settings = KuisSettings::where('materi_id', $materi->id)->first();
-
-        return view('kuis.index', compact('guru', 'materi', 'soalList', 'allMateri', 'settings'));
+        return view('kuis.index', compact('guru', 'settings', 'soalList', 'judulKuis'));
     }
 
     // ─── SETTINGS ─────────────────────────────────────────────────────────────
 
     /**
-     * GET /api/kuis/settings?materi_id=X
+     * GET /api/kuis/settings?kuis_settings_id=X
      */
     public function getSettings(Request $request)
     {
-        $settings = KuisSettings::where('materi_id', $request->query('materi_id'))->first();
+        $settings = KuisSettings::find($request->query('kuis_settings_id'));
 
-        return response()->json([
-            'success' => true,
-            'data' => $settings,
-        ]);
+        return response()->json(['success' => true, 'data' => $settings]);
     }
 
     /**
@@ -60,27 +61,31 @@ class KuisTikController extends Controller
     {
         $validated = $request->validated();
 
-        // Cek duplikasi id_kuis (exclude materi ini sendiri)
+        // Cek duplikasi id_kuis
+        $settingsId = $request->input('settings_id');
         $duplicate = KuisSettings::where('id_kuis', $validated['id_kuis'])
-            ->where('materi_id', '!=', $validated['materi_id'])
+            ->when($settingsId, fn ($q) => $q->where('id', '!=', $settingsId))
             ->exists();
 
         if ($duplicate) {
             return response()->json([
                 'success' => false,
-                'errors' => ['id_kuis' => ['ID Kuis sudah digunakan oleh materi lain.']],
+                'errors' => ['id_kuis' => ['ID Kuis sudah digunakan.']],
             ], 422);
         }
 
-        $settings = KuisSettings::updateOrCreate(
-            ['materi_id' => $validated['materi_id']],
-            [
-                'id_kuis' => $validated['id_kuis'],
-                'waktu_per_soal' => $validated['waktu_per_soal'],
-                'satuan_waktu' => $validated['satuan_waktu'],
-                'kkm' => $validated['kkm'],
-            ]
-        );
+        // Pastikan guru_id terisi
+        if (empty($validated['guru_id'])) {
+            $validated['guru_id'] = Auth::guard('guru')->id()
+                ?? Guru::first()->id;
+        }
+
+        if ($settingsId) {
+            $settings = KuisSettings::findOrFail($settingsId);
+            $settings->update($validated);
+        } else {
+            $settings = KuisSettings::create($validated);
+        }
 
         return response()->json([
             'success' => true,
@@ -97,7 +102,6 @@ class KuisTikController extends Controller
     public function checkId(Request $request)
     {
         $query = KuisTik::where('id_soal', $request->query('id_soal'));
-
         if ($request->query('exclude_id')) {
             $query->where('id', '!=', $request->query('exclude_id'));
         }
@@ -106,24 +110,24 @@ class KuisTikController extends Controller
     }
 
     /**
-     * GET /api/kuis?materi_id=X
+     * GET /api/kuis?kuis_settings_id=X
      */
     public function index(Request $request)
     {
-        $materiId = $request->query('materi_id');
-
-        if (! $materiId) {
-            return response()->json(['success' => false, 'message' => 'materi_id wajib diisi'], 422);
+        $kuisSettingsId = $request->query('kuis_settings_id');
+        if (! $kuisSettingsId) {
+            return response()->json(['success' => false, 'message' => 'kuis_settings_id wajib diisi'], 422);
         }
 
-        $soal = KuisTik::where('materi_id', $materiId)->orderBy('urutan')->get();
+        $soal = KuisTik::where('kuis_settings_id', $kuisSettingsId)
+            ->orderBy('urutan')
+            ->get();
 
         return response()->json(['success' => true, 'data' => $soal, 'total' => $soal->count()]);
     }
 
     /**
      * POST /api/kuis
-     * id_soal di-generate otomatis dari id_kuis + nomor urut jika tidak dikirim.
      */
     public function store(StoreKuisRequest $request)
     {
@@ -131,12 +135,20 @@ class KuisTikController extends Controller
 
         // Auto-generate id_soal
         if (empty($validated['id_soal'])) {
-            $settings = KuisSettings::where('materi_id', $validated['materi_id'])->first();
-            $prefix = $settings ? $settings->id_kuis : 'SOAL';
-            $next = KuisTik::where('materi_id', $validated['materi_id'])->count() + 1;
-            $validated['id_soal'] = $prefix.'-'.str_pad($next, 2, '0', STR_PAD_LEFT);
+            $settings = KuisSettings::find(
+                $validated['kuis_settings_id']
+                    ?? KuisSettings::where('materi_id', $validated['materi_id'] ?? null)->first()?->id
+            );
+            $prefix = $settings?->id_kuis ?? 'SOAL';
+            $next = KuisTik::where(function ($q) use ($validated) {
+                if (! empty($validated['kuis_settings_id'])) {
+                    $q->where('kuis_settings_id', $validated['kuis_settings_id']);
+                } elseif (! empty($validated['materi_id'])) {
+                    $q->where('materi_id', $validated['materi_id']);
+                }
+            })->count() + 1;
 
-            // Pastikan tidak duplikat (edge case)
+            $validated['id_soal'] = $prefix.'-'.str_pad($next, 2, '0', STR_PAD_LEFT);
             while (KuisTik::where('id_soal', $validated['id_soal'])->exists()) {
                 $next++;
                 $validated['id_soal'] = $prefix.'-'.str_pad($next, 2, '0', STR_PAD_LEFT);
@@ -144,14 +156,20 @@ class KuisTikController extends Controller
         }
 
         if (empty($validated['urutan'])) {
-            $validated['urutan'] = KuisTik::where('materi_id', $validated['materi_id'])->max('urutan') + 1;
+            $validated['urutan'] = KuisTik::where(function ($q) use ($validated) {
+                if (! empty($validated['kuis_settings_id'])) {
+                    $q->where('kuis_settings_id', $validated['kuis_settings_id']);
+                } elseif (! empty($validated['materi_id'])) {
+                    $q->where('materi_id', $validated['materi_id']);
+                }
+            })->max('urutan') + 1;
         }
 
         $soal = KuisTik::create($validated);
 
         return response()->json([
             'success' => true,
-            'message' => 'Soal kuis berhasil ditambahkan',
+            'message' => 'Soal berhasil ditambahkan',
             'data' => $soal,
         ], 201);
     }
@@ -165,7 +183,7 @@ class KuisTikController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Soal kuis berhasil diperbarui',
+            'message' => 'Soal berhasil diperbarui',
             'data' => $kuis->fresh(),
         ]);
     }
@@ -177,50 +195,40 @@ class KuisTikController extends Controller
     {
         $kuis->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Soal kuis berhasil dihapus',
-        ]);
+        return response()->json(['success' => true, 'message' => 'Soal berhasil dihapus']);
     }
 
     // ─── PUBLISH ──────────────────────────────────────────────────────────────
 
     /**
-     * POST /api/kuis/publish/{materi}
+     * POST /api/kuis/publish/{settings}
      */
-    public function publish(MateriBelajar $materi)
+    public function publish(KuisSettings $settings)
     {
-        $settings = KuisSettings::where('materi_id', $materi->id)->first();
+        $jumlahSoal = KuisTik::where('kuis_settings_id', $settings->id)->count();
 
-        if (! $settings) {
-            return response()->json(['success' => false, 'message' => 'Pengaturan kuis belum diisi.'], 422);
-        }
-
-        if (KuisTik::where('materi_id', $materi->id)->count() === 0) {
-            return response()->json(['success' => false, 'message' => 'Kuis harus memiliki minimal 1 soal sebelum dipublish.'], 422);
+        if ($jumlahSoal === 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kuis harus memiliki minimal 1 soal sebelum dipublish.',
+            ], 422);
         }
 
         $settings->update(['status' => 'published', 'published_at' => now()]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Kuis berhasil dipublish! Siswa sekarang dapat mengerjakan kuis ini.',
+            'message' => 'Kuis berhasil dipublish!',
             'status' => 'published',
             'published_at' => $settings->published_at->format('d M Y, H:i'),
         ]);
     }
 
     /**
-     * POST /api/kuis/unpublish/{materi}
+     * POST /api/kuis/unpublish/{settings}
      */
-    public function unpublish(MateriBelajar $materi)
+    public function unpublish(KuisSettings $settings)
     {
-        $settings = KuisSettings::where('materi_id', $materi->id)->first();
-
-        if (! $settings) {
-            return response()->json(['success' => false, 'message' => 'Pengaturan kuis tidak ditemukan.'], 404);
-        }
-
         $settings->update(['status' => 'draft', 'published_at' => null]);
 
         return response()->json([

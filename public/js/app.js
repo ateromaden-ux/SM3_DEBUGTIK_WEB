@@ -33,6 +33,40 @@ function showToast(message, type = 'success') {
     setTimeout(() => toast.remove(), 3000);
 }
 
+// ─── HAPUS KUIS ALL ────────────────────────────────────────────────────────
+async function hapusKuisSidebar(event, materiId) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!confirm('Hapus seluruh kuis ini? Soal dan pengaturan akan hilang permanen.')) {
+        return;
+    }
+
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+    try {
+        const response = await fetch(`/api/kuis/all/${materiId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': csrf,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showToast(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showToast(data.message || 'Gagal hapus kuis', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showToast('Error hapus kuis', 'error');
+    }
+}
+
 // ─── DEBOUNCE ─────────────────────────────────────────────────────────────────
 let _globalDebounceTimer = null;
 

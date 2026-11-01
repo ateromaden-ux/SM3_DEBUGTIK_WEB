@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::table('kuis_settings', function (Blueprint $table) {
             $table->enum('status', ['draft', 'published'])
-                  ->default('draft')
-                  ->after('kkm');
+                ->default('draft')
+                ->after('kkm');
             $table->timestamp('published_at')->nullable()->after('status');
         });
     }

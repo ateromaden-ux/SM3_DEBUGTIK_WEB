@@ -1,46 +1,49 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\KelolaKuisController;
+use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\MateriBelajarController;
 use App\Http\Controllers\KuisTikController;
 use App\Http\Controllers\LabPraktikController;
-use App\Http\Controllers\AttachmentController;
+use App\Http\Controllers\MateriBelajarController;
 use App\Http\Controllers\PengaturanController;
 use App\Http\Controllers\RekapNilaiController;
-use Illuminate\Support\Facades\Hash;
 use App\Models\Guru;
+use App\Models\MateriBelajar;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('auth.login');
 });
 
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 
 // Test auth
-Route::get('/test-auth', function() {
+Route::get('/test-auth', function () {
     $guru = Guru::where('email', 'siti.nurhaliza@sekolah.sch.id')->first();
-    if (!$guru) {
+    if (! $guru) {
         return 'Guru not found';
     }
-    
+
     $passwordCheck = Hash::check('password123', $guru->password);
-    
+
     return [
         'guru_exists' => true,
         'email' => $guru->email,
         'password_check' => $passwordCheck,
-        'password_hash' => substr($guru->password, 0, 20)
+        'password_hash' => substr($guru->password, 0, 20),
     ];
 });
 
 Route::middleware('auth:guru')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/kelola-kuis', [KelolaKuisController::class, 'index'])->name('kelola-kuis');
+    Route::post('/kelola-kuis', [KelolaKuisController::class, 'store'])->name('kelola-kuis.store');
     Route::get('/rekap-nilai', [RekapNilaiController::class, 'index'])->name('rekap-nilai');
     // Redirect /kelola-materi to unified dashboard with tab
-    Route::get('/kelola-materi', function() {
+    Route::get('/kelola-materi', function () {
         return redirect('/dashboard?tab=kelola-materi');
     })->name('kelola.materi.redirect');
 
@@ -62,25 +65,26 @@ Route::middleware('auth:guru')->group(function () {
         Route::post('/', [KuisTikController::class, 'store'])->name('kuis.store');
         Route::put('/{kuis}', [KuisTikController::class, 'update'])->name('kuis.update');
         Route::delete('/{kuis}', [KuisTikController::class, 'destroy'])->name('kuis.destroy');
+        Route::delete('/all/{materi}', [KuisTikController::class, 'destroyAllByMateri'])->name('kuis.destroy-all');
     });
 
     // API routes for attachments
     Route::prefix('api/attachment')->group(function () {
         // Materi
         Route::post('/materi/{materi}', [AttachmentController::class, 'uploadMateri'])->name('attachment.materi.upload');
-        Route::get('/materi/{materi}',  [AttachmentController::class, 'listMateri'])->name('attachment.materi.list');
+        Route::get('/materi/{materi}', [AttachmentController::class, 'listMateri'])->name('attachment.materi.list');
         // Soal kuis
-        Route::post('/soal/{soal}',     [AttachmentController::class, 'uploadSoal'])->name('attachment.soal.upload');
-        Route::get('/soal/{soal}',      [AttachmentController::class, 'listSoal'])->name('attachment.soal.list');
+        Route::post('/soal/{soal}', [AttachmentController::class, 'uploadSoal'])->name('attachment.soal.upload');
+        Route::get('/soal/{soal}', [AttachmentController::class, 'listSoal'])->name('attachment.soal.list');
         // Delete (shared)
-        Route::delete('/{attachment}',  [AttachmentController::class, 'destroy'])->name('attachment.destroy');
+        Route::delete('/{attachment}', [AttachmentController::class, 'destroy'])->name('attachment.destroy');
     });
 
     // Halaman fullpage kelola soal kuis
-    Route::get('/kuis/{materi}', [KuisTikController::class, 'showPage'])->name('kuis.page');
-    Route::post('/api/kuis/publish/{materi}',   [KuisTikController::class, 'publish'])->name('kuis.publish');
-    Route::post('/api/kuis/unpublish/{materi}', [KuisTikController::class, 'unpublish'])->name('kuis.unpublish');
-    Route::get('/kuis-play/{materi}', function (App\Models\MateriBelajar $materi) {
+    Route::get('/kuis/{settings}', [KuisTikController::class, 'showPage'])->name('kuis.page');
+    Route::post('/api/kuis/publish/{settings}', [KuisTikController::class, 'publish'])->name('kuis.publish');
+    Route::post('/api/kuis/unpublish/{settings}', [KuisTikController::class, 'unpublish'])->name('kuis.unpublish');
+    Route::get('/kuis-play/{materi}', function (MateriBelajar $materi) {
         return view('kuis.play', compact('materi'));
     })->name('kuis.play');
 
@@ -93,10 +97,11 @@ Route::middleware('auth:guru')->group(function () {
     });
     Route::post('/logout', function () {
         Auth::guard('guru')->logout();
+
         return redirect('/');
     })->name('logout');
 
     // Pengaturan
-    Route::post('/pengaturan/profil',   [PengaturanController::class, 'updateProfil'])->name('pengaturan.profil');
+    Route::post('/pengaturan/profil', [PengaturanController::class, 'updateProfil'])->name('pengaturan.profil');
     Route::post('/pengaturan/password', [PengaturanController::class, 'updatePassword'])->name('pengaturan.password');
 });

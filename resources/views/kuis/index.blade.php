@@ -14,10 +14,38 @@
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-thumb { background: #bfc7d2; border-radius: 9999px; }
         ::-webkit-scrollbar-track { background: transparent; }
+        
+        /* Purposeful animations - no generic transition-all */
+        @keyframes slideDown { from { opacity: 0; max-height: 0; } to { opacity: 1; max-height: 800px; } }
+        @keyframes slideUp { from { opacity: 1; max-height: 800px; } to { opacity: 0; max-height: 0; } }
+        @keyframes popBadge { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+        @keyframes shiftBorder { from { border-left-width: 0; } to { border-left-width: 4px; } }
+        
+        /* Sidebar dropdown spring */
+        #kuis-nav-dropdown { animation: slideDown 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); overflow: hidden; }
+        #kuis-nav-dropdown.collapsing { animation: slideUp 0.2s ease-out forwards; }
+        
+        /* Soal item active state - instant border shift */
+        .soal-item.active { border-left: 4px solid rgb(var(--color-secondary)); animation: shiftBorder 0.1s ease-out; }
+        
+        /* Delete button - color invert, not shadow */
+        .soal-item button:hover { background-color: rgb(var(--color-error) / 0.1); color: rgb(var(--color-error)); transition: background-color 0s, color 0s; }
+        
+        /* Input focus - instant border, no fade */
+        input:focus, textarea:focus { border-color: rgb(var(--color-secondary)); transition: border-color 0s; }
+        
+        /* Badge state change pop */
+        .badge-publish-active { animation: popBadge 0.3s ease-out; }
+        
+        /* Nav hover - translate not scale */
+        nav a:hover { transform: translateX(2px); transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        /* Sidebar item hover - background instant, text delayed */
+        .group:hover .absolute { opacity: 1; transition: opacity 0.1s ease-out; }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
     @include('layouts.partials.tailwind-config')
-    <title>Kelola Soal Kuis — {{ $materi->judul }}</title>
+    <title>Kelola Soal Kuis — {{ $judulKuis }}</title>
 </head>
 <body class="bg-surface font-body-md text-body-md text-on-surface h-screen overflow-hidden">
 
@@ -56,16 +84,16 @@
             <span class="material-symbols-outlined text-white">close</span>
         </button>
         <div class="w-full h-full overflow-y-auto">
-            <livewire:kuis-player :materi="$materi" />
+            <livewire:kuis-player :materi="$settings->materi" />
         </div>
     </div>
 </div>
 
 {{-- Data dari server untuk dipakai JavaScript --}}
 <script>
-    const CSRF       = document.querySelector('meta[name="csrf-token"]')?.content || '';
-    const MATERI_ID  = {{ $materi->id }};
-    const MATERI_ID_PAGE = {{ $materi->id }};
+    const CSRF           = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    const KUIS_SETTINGS_ID = {{ $settings->id }};
+    const MATERI_ID_PAGE = {{ $settings->id }}; // alias untuk kuis-editor.js (publish/unpublish)
 
     // Soal data di-inject server agar form load tanpa fetch ulang
     let soalData = @json($soalList->keyBy('id'));

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\LabPraktik;
-use App\Models\MateriBelajar;
 use Illuminate\Http\Request;
 
 class LabPraktikController extends Controller
@@ -16,16 +15,18 @@ class LabPraktikController extends Controller
     {
         $materiId = $request->query('materi_id');
 
-        if (!$materiId) {
+        if (! $materiId) {
             return response()->json(['success' => false, 'message' => 'materi_id wajib diisi'], 422);
         }
 
-        $labs = LabPraktik::where('materi_id', $materiId)->get();
+        $labs = LabPraktik::where('materi_id', $materiId)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return response()->json([
             'success' => true,
-            'data'    => $labs,
-            'total'   => $labs->count(),
+            'data' => $labs,
+            'total' => $labs->count(),
         ]);
     }
 
@@ -36,15 +37,15 @@ class LabPraktikController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'materi_id'         => 'required|exists:materi_belajar,id',
-            'id_lab'            => 'required|string|unique:lab_praktik,id_lab',
-            'deskripsi_kasus'   => 'required|string',
-            'kode_soal_awal'    => 'required|string',
-            'bug_target'        => 'required|string',
-            'solusi_fix'        => 'required|string',
+            'materi_id' => 'required|exists:materi_belajar,id',
+            'id_lab' => 'required|string|unique:lab_praktik,id_lab',
+            'deskripsi_kasus' => 'required|string',
+            'kode_soal_awal' => 'required|string',
+            'bug_target' => 'required|string',
+            'solusi_fix' => 'required|string',
             'tingkat_kesulitan' => 'required|in:mudah,sedang,sulit',
-            'poin_max'          => 'integer|min:10|max:200',
-            'test_cases'        => 'nullable|array',
+            'poin_max' => 'integer|min:10|max:200',
+            'test_cases' => 'nullable|array',
         ]);
 
         $lab = LabPraktik::create($validated);
@@ -52,7 +53,7 @@ class LabPraktikController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Lab praktik berhasil ditambahkan',
-            'data'    => $lab,
+            'data' => $lab,
         ], 201);
     }
 
@@ -63,13 +64,13 @@ class LabPraktikController extends Controller
     public function update(Request $request, LabPraktik $lab)
     {
         $validated = $request->validate([
-            'deskripsi_kasus'   => 'string',
-            'kode_soal_awal'    => 'string',
-            'bug_target'        => 'string',
-            'solusi_fix'        => 'string',
+            'deskripsi_kasus' => 'string',
+            'kode_soal_awal' => 'string',
+            'bug_target' => 'string',
+            'solusi_fix' => 'string',
             'tingkat_kesulitan' => 'in:mudah,sedang,sulit',
-            'poin_max'          => 'integer|min:10|max:200',
-            'test_cases'        => 'nullable|array',
+            'poin_max' => 'integer|min:10|max:200',
+            'test_cases' => 'nullable|array',
         ]);
 
         $lab->update($validated);
@@ -77,7 +78,7 @@ class LabPraktikController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Lab praktik berhasil diperbarui',
-            'data'    => $lab->fresh(),
+            'data' => $lab->fresh(),
         ]);
     }
 

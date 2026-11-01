@@ -14,10 +14,10 @@ class SaveKuisSettingsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'materi_id' => ['required', 'exists:materi_belajar,id'],
+            'guru_id' => ['nullable', 'exists:gurus,id'],
+            'nama_kuis' => ['required', 'string', 'max:150'],
+            'deskripsi' => ['nullable', 'string'],
             'id_kuis' => ['required', 'string', 'max:100'],
-            'waktu_per_soal' => ['required', 'integer', 'min:1', 'max:3600'],
-            'satuan_waktu' => ['required', 'in:detik,menit,jam'],
             'kkm' => ['required', 'integer', 'min:0', 'max:100'],
         ];
     }
@@ -25,8 +25,8 @@ class SaveKuisSettingsRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'nama_kuis.required' => 'Nama kuis wajib diisi.',
             'id_kuis.required' => 'ID Kuis wajib diisi.',
-            'waktu_per_soal.required' => 'Waktu per soal wajib diisi.',
             'kkm.required' => 'KKM wajib diisi.',
         ];
     }

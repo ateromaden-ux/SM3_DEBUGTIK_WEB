@@ -10,6 +10,7 @@ class KuisTik extends Model
 
     protected $fillable = [
         'materi_id',
+        'kuis_settings_id',
         'id_soal',
         'pertanyaan',
         'tipe',
@@ -17,6 +18,7 @@ class KuisTik extends Model
         'kunci_jawaban',
         'penjelasan_opsi',
         'poin',
+        'waktu',
         'urutan',
     ];
 
@@ -24,11 +26,21 @@ class KuisTik extends Model
         'opsi_jawaban' => 'array',
         'kunci_jawaban' => 'array',
         'penjelasan_opsi' => 'array',
+        'waktu' => 'integer',
     ];
 
+    // ─── Relasi ───────────────────────────────────────────────────────────────
+
+    /** Soal bisa terikat ke materi (legacy/opsional). */
     public function materi()
     {
         return $this->belongsTo(MateriBelajar::class, 'materi_id');
+    }
+
+    /** Soal terikat langsung ke kuis settings (mode standalone). */
+    public function kuisSettings()
+    {
+        return $this->belongsTo(KuisSettings::class, 'kuis_settings_id');
     }
 
     public function attachments()

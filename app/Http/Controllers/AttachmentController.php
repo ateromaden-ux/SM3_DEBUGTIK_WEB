@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attachment;
-use App\Models\MateriBelajar;
 use App\Models\KuisTik;
+use App\Models\MateriBelajar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -18,12 +18,21 @@ class AttachmentController extends Controller
     public function uploadMateri(Request $request, MateriBelajar $materi)
     {
         $request->validate([
-            'files'    => 'required|array|min:1|max:5',
-            'files.*'  => 'file|max:20480|mimes:pdf,jpg,jpeg,png,gif,webp,doc,docx,ppt,pptx',
+            'files' => 'required|array|min:1',
+            'files.*' => 'file|max:20480|mimes:pdf,jpg,jpeg,png,gif,webp,doc,docx,ppt,pptx',
         ], [
-            'files.*.max'   => 'Ukuran file maksimal 20 MB.',
+            'files.*.max' => 'Ukuran per file maksimal 20 MB.',
             'files.*.mimes' => 'Tipe file tidak didukung. Gunakan PDF, gambar, atau dokumen.',
         ]);
+
+        // Validasi total ukuran semua file ≤ 20MB
+        $totalBytes = collect($request->file('files'))->sum(fn ($f) => $f->getSize());
+        if ($totalBytes > 20 * 1024 * 1024) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Total ukuran semua file tidak boleh melebihi 20 MB.',
+            ], 422);
+        }
 
         $uploaded = [];
 
@@ -32,12 +41,12 @@ class AttachmentController extends Controller
 
             $att = Attachment::create([
                 'attachable_type' => MateriBelajar::class,
-                'attachable_id'   => $materi->id,
-                'nama_file'       => $file->getClientOriginalName(),
-                'path'            => $path,
-                'mime_type'       => $file->getMimeType(),
-                'ukuran'          => $file->getSize(),
-                'disk'            => 'public',
+                'attachable_id' => $materi->id,
+                'nama_file' => $file->getClientOriginalName(),
+                'path' => $path,
+                'mime_type' => $file->getMimeType(),
+                'ukuran' => $file->getSize(),
+                'disk' => 'public',
             ]);
 
             $uploaded[] = $this->formatAttachment($att);
@@ -45,8 +54,8 @@ class AttachmentController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => count($uploaded) . ' file berhasil diunggah.',
-            'data'    => $uploaded,
+            'message' => count($uploaded).' file berhasil diunggah.',
+            'data' => $uploaded,
         ], 201);
     }
 
@@ -58,10 +67,10 @@ class AttachmentController extends Controller
     public function uploadSoal(Request $request, KuisTik $soal)
     {
         $request->validate([
-            'files'   => 'required|array|min:1|max:3',
+            'files' => 'required|array|min:1|max:3',
             'files.*' => 'file|max:5120|mimes:jpg,jpeg,png,gif,webp,pdf',
         ], [
-            'files.*.max'   => 'Ukuran file maksimal 5 MB.',
+            'files.*.max' => 'Ukuran file maksimal 5 MB.',
             'files.*.mimes' => 'Hanya gambar (JPG/PNG/GIF/WebP) dan PDF yang diizinkan.',
         ]);
 
@@ -72,12 +81,12 @@ class AttachmentController extends Controller
 
             $att = Attachment::create([
                 'attachable_type' => KuisTik::class,
-                'attachable_id'   => $soal->id,
-                'nama_file'       => $file->getClientOriginalName(),
-                'path'            => $path,
-                'mime_type'       => $file->getMimeType(),
-                'ukuran'          => $file->getSize(),
-                'disk'            => 'public',
+                'attachable_id' => $soal->id,
+                'nama_file' => $file->getClientOriginalName(),
+                'path' => $path,
+                'mime_type' => $file->getMimeType(),
+                'ukuran' => $file->getSize(),
+                'disk' => 'public',
             ]);
 
             $uploaded[] = $this->formatAttachment($att);
@@ -85,8 +94,8 @@ class AttachmentController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => count($uploaded) . ' file berhasil diunggah.',
-            'data'    => $uploaded,
+            'message' => count($uploaded).' file berhasil diunggah.',
+            'data' => $uploaded,
         ], 201);
     }
 
@@ -112,7 +121,7 @@ class AttachmentController extends Controller
     public function listMateri(MateriBelajar $materi)
     {
         $attachments = $materi->attachments()->latest()->get()
-            ->map(fn($a) => $this->formatAttachment($a));
+            ->map(fn ($a) => $this->formatAttachment($a));
 
         return response()->json(['success' => true, 'data' => $attachments]);
     }
@@ -124,7 +133,7 @@ class AttachmentController extends Controller
     public function listSoal(KuisTik $soal)
     {
         $attachments = $soal->attachments()->latest()->get()
-            ->map(fn($a) => $this->formatAttachment($a));
+            ->map(fn ($a) => $this->formatAttachment($a));
 
         return response()->json(['success' => true, 'data' => $attachments]);
     }
@@ -134,15 +143,15 @@ class AttachmentController extends Controller
     private function formatAttachment(Attachment $att): array
     {
         return [
-            'id'              => $att->id,
-            'nama_file'       => $att->nama_file,
-            'url'             => $att->url,
-            'mime_type'       => $att->mime_type,
-            'ukuran'          => $att->ukuran,
+            'id' => $att->id,
+            'nama_file' => $att->nama_file,
+            'url' => $att->url,
+            'mime_type' => $att->mime_type,
+            'ukuran' => $att->ukuran,
             'ukuran_readable' => $att->ukuran_readable,
-            'icon'            => $att->icon,
-            'is_image'        => $att->isImage(),
-            'is_pdf'          => $att->isPdf(),
+            'icon' => $att->icon,
+            'is_image' => $att->isImage(),
+            'is_pdf' => $att->isPdf(),
         ];
     }
 }

@@ -16,7 +16,16 @@
  *   → di-inject via <script> di kuis/index.blade.php sebelum file ini dimuat.
  */
 
-// ─── TIPE SOAL ────────────────────────────────────────────────────────────────
+// Event listener pembatas input poin otomatis ke max 100
+document.addEventListener('DOMContentLoaded', () => {
+    const poinInput = document.getElementById('f-poin');
+    if (poinInput) {
+        poinInput.addEventListener('input', function() {
+            if (parseInt(this.value) > 100) this.value = 100;
+            if (parseInt(this.value) < 1 && this.value !== '') this.value = 1;
+        });
+    }
+});
 function setTipe(tipe) {
     document.getElementById('f-tipe').value = tipe;
 
@@ -139,6 +148,7 @@ function loadSoalToForm(id) {
     if (disp) { disp.textContent = soal.id_soal; }
     document.getElementById('f-pertanyaan').value  = soal.pertanyaan;
     document.getElementById('f-poin').value        = soal.poin;
+    document.getElementById('f-waktu').value       = soal.waktu || 30;
     document.getElementById('btn-hapus').classList.remove('hidden');
     document.getElementById('btn-hapus').classList.add('flex');
 
@@ -187,6 +197,7 @@ function resetForm() {
     if (disp) { disp.textContent = 'auto'; }
     document.getElementById('f-kunci').value   = '';
     document.getElementById('f-poin').value    = '25';
+    document.getElementById('f-waktu').value   = '30';
     document.getElementById('btn-hapus').classList.add('hidden');
     document.getElementById('btn-hapus').classList.remove('flex');
     document.querySelectorAll('.dup-hint').forEach(el => { el.textContent = ''; });
@@ -222,6 +233,13 @@ function handleSimpan(e) {
 
         if (!kunci.length)  { showToast('Pilih minimal satu jawaban benar', 'error'); return; }
         if (opsi.length < 2) { showToast('Isi minimal 2 opsi jawaban', 'error'); return; }
+        
+        // Validasi poin maksimal 100
+        const poin = parseInt(document.getElementById('f-poin').value);
+        if (poin < 1 || poin > 100) {
+            showToast('Poin harus antara 1 – 100', 'error');
+            return;
+        }
 
         const hurufIdx = { A: 0, B: 1, C: 2, D: 3 };
         kunci = kunci.map(k => opsi[hurufIdx[k]] ?? k);
@@ -231,13 +249,14 @@ function handleSimpan(e) {
     }
 
     const body = {
-        materi_id:       MATERI_ID,
+        kuis_settings_id: document.getElementById('f-kuis-settings-id')?.value || '',
         tipe,
         pertanyaan:      document.getElementById('f-pertanyaan').value,
         opsi_jawaban:    opsi,
         kunci_jawaban:   kunci,
         penjelasan_opsi: penj,
         poin:            document.getElementById('f-poin').value,
+        waktu:           document.getElementById('f-waktu').value,
     };
 
     const url    = isEdit ? `/api/kuis/${dbId}` : '/api/kuis';
@@ -311,7 +330,13 @@ function updateSoalData(soal, isEdit) {
             <p class="font-body-sm text-body-sm text-on-surface mt-space-xs line-clamp-2">${soal.pertanyaan}</p>
             <div class="flex items-center justify-between mt-space-xs">
                 <span class="font-code-inline text-code-inline text-outline">${soal.id_soal}</span>
-                <span class="font-label-badge text-label-badge text-on-surface-variant">${soal.poin} poin</span>
+                <div class="flex items-center gap-space-md">
+                    <span class="font-label-badge text-label-badge text-on-surface-variant flex items-center gap-space-2xs">
+                        <span class="material-symbols-outlined text-[12px]">timer</span>
+                        ${soal.waktu || 30}s
+                    </span>
+                    <span class="font-label-badge text-label-badge text-on-surface-variant">${soal.poin} poin</span>
+                </div>
             </div>`;
         list.appendChild(div);
     }
@@ -394,7 +419,7 @@ function saveSettings(e) {
     btn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">sync</span> Menyimpan...';
 
     const body = {
-        materi_id:      document.getElementById('s-materi-id').value,
+        settings_id:    document.getElementById('s-settings-id')?.value || '',
         id_kuis:        document.getElementById('s-id-kuis').value.trim(),
         waktu_per_soal: document.getElementById('s-waktu').value,
         satuan_waktu:   document.getElementById('s-satuan').value,

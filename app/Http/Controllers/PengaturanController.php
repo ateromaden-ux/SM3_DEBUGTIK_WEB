@@ -19,14 +19,14 @@ class PengaturanController extends Controller
         $guru = Auth::guard('guru')->user();
 
         $validated = $request->validate([
-            'name'           => 'required|string|max:255',
-            'nip'            => 'required|string|max:50|unique:gurus,nip,' . $guru->id,
-            'sekolah'        => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
+            'nip' => 'required|string|max:50|unique:gurus,nip,'.$guru->id,
+            'sekolah' => 'nullable|string|max:255',
             'mata_pelajaran' => 'nullable|string|max:100',
-            'no_hp'          => 'nullable|string|max:15',
-            'tahun_ajaran'   => 'required|string|max:20',
-            'semester'       => 'required|in:Ganjil,Genap',
-            'foto'           => 'nullable|image|max:2048',
+            'no_hp' => 'nullable|string|max:15',
+            'tahun_ajaran' => 'required|string|max:20',
+            'semester' => 'required|in:Ganjil,Genap',
+            'foto' => 'nullable|image|max:2048',
         ], [
             'nip.unique' => 'NIP sudah digunakan oleh akun lain.',
         ]);
@@ -44,14 +44,14 @@ class PengaturanController extends Controller
         $guru->update($validated);
 
         return response()->json([
-            'success'     => true,
-            'message'     => 'Profil berhasil diperbarui.',
-            'foto_url'    => $guru->foto_profil
+            'success' => true,
+            'message' => 'Profil berhasil diperbarui.',
+            'foto_url' => $guru->foto_profil
                 ? Storage::disk('public')->url($guru->foto_profil)
                 : null,
-            'name'        => $guru->name,
-            'tahun_ajaran'=> $guru->tahun_ajaran,
-            'semester'    => $guru->semester,
+            'name' => $guru->name,
+            'tahun_ajaran' => $guru->tahun_ajaran,
+            'semester' => $guru->semester,
         ]);
     }
 
@@ -64,14 +64,14 @@ class PengaturanController extends Controller
         $guru = Auth::guard('guru')->user();
 
         $request->validate([
-            'current_password'      => 'required|string',
-            'password'              => 'required|string|min:8|confirmed',
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:8|confirmed',
         ], [
             'password.confirmed' => 'Konfirmasi password baru tidak cocok.',
-            'password.min'       => 'Password baru minimal 8 karakter.',
+            'password.min' => 'Password baru minimal 8 karakter.',
         ]);
 
-        if (!Hash::check($request->current_password, $guru->password)) {
+        if (! Hash::check($request->current_password, $guru->password)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Password lama salah.',

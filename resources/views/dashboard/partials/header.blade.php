@@ -14,14 +14,8 @@
         </div>
     </div>
 
-    {{-- Kanan: info kurikulum + notif + profil --}}
-    <div class="flex items-center gap-space-md">
-        <div class="hidden lg:flex items-center gap-space-xs px-space-sm py-space-2xs rounded-full bg-surface-container">
-            <span class="material-symbols-outlined text-primary text-[16px]">school</span>
-            <span class="font-label-badge text-label-badge text-on-surface font-medium">Kurikulum Merdeka 2024</span>
-            <span class="text-outline text-label-badge">•</span>
-            <span class="font-label-badge text-label-badge text-primary font-bold">Sem. Ganjil</span>
-        </div>
+    {{-- Kanan: notif + profil --}}
+    <div class="flex items-center gap-space-md ml-auto">
 
         <button class="relative w-10 h-10 rounded-xl bg-surface-container-low hover:bg-surface-container hover:text-on-surface text-on-surface-variant flex items-center justify-center transition-colors"
                 type="button">

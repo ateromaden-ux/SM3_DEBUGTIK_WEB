@@ -6,7 +6,6 @@ use App\Models\Guru;
 use App\Models\MateriBelajar;
 use App\Models\ProgressBelajar;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -130,7 +129,7 @@ class GuruSeeder extends Seeder
             foreach ($materis->random(2) as $materi) {
                 $persentase = rand(0, 100);
                 $statusSelesai = $persentase >= 100;
-                
+
                 ProgressBelajar::create([
                     'user_id' => $user->id,
                     'materi_id' => $materi->id,
