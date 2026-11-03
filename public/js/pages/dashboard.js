@@ -289,7 +289,18 @@ function handleMateriDrop(e) {
 }
 
 function handleMateriFileSelect(files) {
-    Array.from(files).forEach(f => _materiPendingFiles.push(f));
+    const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'doc', 'docx', 'ppt', 'pptx'];
+    
+    const validFiles = Array.from(files).filter(f => {
+        const ext = f.name.split('.').pop().toLowerCase();
+        if (!allowedExtensions.includes(ext)) {
+            showToast(`File "${f.name}" tidak diizinkan. Gunakan PDF, Gambar, atau Dokumen.`, 'error');
+            return false;
+        }
+        return true;
+    });
+
+    validFiles.forEach(f => _materiPendingFiles.push(f));
 
     // Validasi total ukuran ≤ 20MB
     const totalBytes = _materiPendingFiles.reduce((sum, f) => sum + f.size, 0);

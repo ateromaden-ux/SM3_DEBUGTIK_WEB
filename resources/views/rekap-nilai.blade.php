@@ -52,10 +52,10 @@
 <div class="px-space-lg py-space-md flex items-center justify-between border-b border-surface-container-high">
 <h2 class="font-headline-md text-headline-md text-on-surface">Daftar Nilai Siswa</h2>
 <div class="flex items-center gap-space-sm">
-<button class="px-space-md py-space-xs rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-title-sm text-title-sm flex items-center gap-space-xs transition-colors">
-<span class="material-symbols-outlined text-[18px]">file_download</span>
-            Ekspor CSV
-          </button>
+            <a href="{{ route('rekap-nilai.export') }}" class="px-space-md py-space-xs rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-title-sm text-title-sm flex items-center gap-space-xs transition-colors no-underline">
+                <span class="material-symbols-outlined text-[18px]">file_download</span>
+                Ekspor CSV
+            </a>
 </div>
 </div>
 <table class="w-full text-left font-body-md text-body-md">

@@ -21,6 +21,7 @@ Route::middleware('auth:guru')->group(function () {
     Route::get('/kelola-kuis', [KelolaKuisController::class, 'index'])->name('kelola-kuis');
     Route::post('/kelola-kuis', [KelolaKuisController::class, 'store'])->name('kelola-kuis.store');
     Route::get('/rekap-nilai', [RekapNilaiController::class, 'index'])->name('rekap-nilai');
+    Route::get('/rekap-nilai/export', [RekapNilaiController::class, 'export'])->name('rekap-nilai.export');
     // Redirect /kelola-materi to unified dashboard with tab
     Route::get('/kelola-materi', function () {
         return redirect('/dashboard?tab=kelola-materi');

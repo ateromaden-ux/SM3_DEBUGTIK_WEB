@@ -743,7 +743,23 @@ function handleSoalDrop(e) {
 }
 
 function handleSoalFileSelect(files) {
-    Array.from(files).forEach(f => _soalPendingFiles.push(f));
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf'];
+    const maxSize = 5 * 1024 * 1024; // 5 MB
+    
+    const validFiles = Array.from(files).filter(f => {
+        const ext = f.name.split('.').pop().toLowerCase();
+        if (!allowedExtensions.includes(ext)) {
+            showToast(`File "${f.name}" tidak diizinkan. Gunakan JPG, PNG, GIF, WEBP, atau PDF.`, 'error');
+            return false;
+        }
+        if (f.size > maxSize) {
+            showToast(`File "${f.name}" terlalu besar. Maksimal 5 MB.`, 'error');
+            return false;
+        }
+        return true;
+    });
+
+    validFiles.forEach(f => _soalPendingFiles.push(f));
     renderSoalFilePreview();
 }
 
