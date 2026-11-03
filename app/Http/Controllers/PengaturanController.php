@@ -20,15 +20,17 @@ class PengaturanController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'nip' => 'required|string|max:50|unique:gurus,nip,'.$guru->id,
+            'nip' => 'required|string|max:50|unique:gurus,nip,'.$guru->id.'|regex:/^[0-9]+$/',
             'sekolah' => 'nullable|string|max:255',
             'mata_pelajaran' => 'nullable|string|max:100',
-            'no_hp' => 'nullable|string|max:15',
+            'no_hp' => 'nullable|string|max:15|regex:/^[0-9]+$/',
             'tahun_ajaran' => 'required|string|max:20',
             'semester' => 'required|in:Ganjil,Genap',
-            'foto' => 'nullable|image|max:2048',
+            'foto' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
         ], [
             'nip.unique' => 'NIP sudah digunakan oleh akun lain.',
+            'nip.regex' => 'NIP hanya boleh berisi angka.',
+            'no_hp.regex' => 'No. HP hanya boleh berisi angka.',
         ]);
 
         // Upload foto profil

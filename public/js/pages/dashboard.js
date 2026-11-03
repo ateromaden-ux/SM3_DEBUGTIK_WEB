@@ -91,7 +91,12 @@ function lihatFileLampiran(materiId, judulMateri) {
     modal.classList.remove('hidden');
     modal.classList.add('flex');
 
-    fetch(`/api/attachment/materi/${materiId}`, { headers: { 'X-CSRF-TOKEN': CSRF } })
+    fetch(`/api/attachment/materi/${materiId}`, { 
+        headers: { 
+            'X-CSRF-TOKEN': CSRF,
+            'Accept': 'application/json'
+        } 
+    })
         .then(r => r.json())
         .then(data => {
             body.innerHTML = '';
@@ -110,18 +115,37 @@ function lihatFileLampiran(materiId, judulMateri) {
                 const color   = isImage ? 'text-primary' : (isPdf ? 'text-error' : 'text-secondary');
 
                 const div = document.createElement('div');
-                div.className = 'flex items-center gap-space-sm px-space-sm py-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors';
+                div.className = 'flex flex-col gap-space-sm rounded-xl bg-surface-container-low p-space-sm';
+                
+                let previewHtml = '';
+                if (isImage) {
+                    previewHtml = `
+                        <div class="rounded-lg overflow-hidden bg-surface-container max-h-40">
+                            <img src="${f.url}" alt="${f.nama_file}" class="w-full h-auto object-contain">
+                        </div>`;
+                } else if (isPdf) {
+                    previewHtml = `
+                        <div class="rounded-lg bg-surface-container p-space-md text-center text-outline">
+                            <span class="material-symbols-outlined text-[48px] block mb-space-sm">picture_as_pdf</span>
+                            <p class="font-body-sm text-body-sm">PDF Preview tidak tersedia</p>
+                            <p class="font-label-badge text-label-badge text-outline text-xs mt-space-xs">Silakan unduh untuk melihat</p>
+                        </div>`;
+                }
+
                 div.innerHTML = `
-                    <span class="material-symbols-outlined ${color} text-[24px] flex-shrink-0">${icon}</span>
-                    <div class="flex-1 min-w-0">
-                        <p class="font-body-sm text-body-sm text-on-surface font-semibold truncate">${f.nama_file}</p>
-                        <p class="font-label-badge text-label-badge text-outline">${f.ukuran_readable}</p>
-                    </div>
-                    <a href="${f.url}" target="_blank"
-                        class="flex items-center gap-space-2xs px-space-sm py-space-xs rounded-lg bg-surface-container hover:bg-primary/10 hover:text-primary text-on-surface-variant font-body-sm text-body-sm transition-colors flex-shrink-0">
-                        <span class="material-symbols-outlined text-[16px]">${isImage ? 'open_in_new' : 'download'}</span>
-                        ${isImage ? 'Buka' : 'Unduh'}
-                    </a>`;
+                    ${previewHtml}
+                    <div class="flex items-start gap-space-sm">
+                        <span class="material-symbols-outlined ${color} text-[24px] flex-shrink-0 mt-space-xs">${icon}</span>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-body-sm text-body-sm text-on-surface font-semibold truncate">${f.nama_file}</p>
+                            <p class="font-label-badge text-label-badge text-outline">${f.ukuran_readable}</p>
+                        </div>
+                        <a href="${f.url}" target="_blank"
+                            class="flex items-center gap-space-2xs px-space-sm py-space-xs rounded-lg bg-surface-container hover:bg-primary/10 hover:text-primary text-on-surface-variant font-body-sm text-body-sm transition-colors flex-shrink-0">
+                            <span class="material-symbols-outlined text-[16px]">${isImage ? 'open_in_new' : 'download'}</span>
+                            ${isImage ? 'Buka' : 'Unduh'}
+                        </a>
+                    </div>`;
                 body.appendChild(div);
             });
         })
@@ -149,6 +173,8 @@ function toggleModal(open) {
         document.getElementById('modal-title').innerText = '+ Tambah Materi Belajar Baru';
         document.getElementById('input-materi-db-id').value = '';
         document.getElementById('materi-form').reset();
+        const est = document.getElementById('input-estimasi-waktu');
+        if (est) est.value = 45;
         _materiPendingFiles = [];
         renderMateriFilePreview();
         const saved = document.getElementById('materi-saved-attachments');
@@ -163,6 +189,8 @@ function openEditorModal(dbId, idMateri, title, category, level, time, deskripsi
     document.getElementById('input-judul-materi').value   = title;
     document.getElementById('input-kategori').value       = category;
     document.getElementById('input-level-materi').value   = level;
+    const est = document.getElementById('input-estimasi-waktu');
+    if (est) est.value = time ?? 45;
     document.getElementById('input-deskripsi').value      = deskripsi;
 
     _materiPendingFiles = [];
@@ -208,6 +236,7 @@ function handleMateriSubmit(e) {
         judul:          document.getElementById('input-judul-materi').value,
         kategori:       document.getElementById('input-kategori').value,
         level:          document.getElementById('input-level-materi').value,
+        estimasi_waktu: document.getElementById('input-estimasi-waktu')?.value || 45,
         deskripsi:      document.getElementById('input-deskripsi').value,
     };
 
@@ -431,6 +460,17 @@ function deleteLab(dbId) {
 function previewFoto(input) {
     const file = input.files[0];
     if (!file) { return; }
+    if (!file.type.startsWith('image/')) {
+        showToast('File harus berupa gambar (JPG, PNG, GIF, WEBP)', 'error');
+        input.value = '';
+        return;
+    }
+    const validMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validMimes.includes(file.type)) {
+        showToast('Format gambar tidak didukung. Gunakan JPG, PNG, GIF, atau WEBP', 'error');
+        input.value = '';
+        return;
+    }
     const reader = new FileReader();
     reader.onload = e => {
         const wrapper = document.getElementById('foto-wrapper');

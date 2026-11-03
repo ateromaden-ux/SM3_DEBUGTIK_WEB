@@ -121,15 +121,8 @@
                 <span class="font-label-badge text-label-badge text-outline tracking-wider uppercase mt-space-2xs">Portal Guru</span>
             </div>
         </div>
+        {{-- Badge kurikulum dihapus --}}
         <div class="px-space-md py-space-sm">
-            <div class="p-space-sm rounded-xl bg-surface-container-low flex flex-col gap-space-2xs">
-                <div class="flex items-center justify-between">
-                    <span class="font-label-badge text-label-badge uppercase text-primary font-semibold">Kurikulum Merdeka</span>
-                    <span class="h-2 w-2 rounded-full bg-tertiary"></span>
-                </div>
-                <span class="font-body-sm text-body-sm font-medium text-on-surface">Fase E & F (Kelas X - XI)</span>
-                <span class="font-body-sm text-body-sm text-on-surface-variant">Semester Ganjil 2024/2025</span>
-            </div>
         </div>
         <nav class="flex flex-col gap-space-2xs px-space-md mt-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-xl">
             <a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#">
@@ -146,19 +139,11 @@
 
 <div class="pl-72">
     <header class="fixed top-0 left-72 right-0 h-16 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-space-lg flex items-center justify-between">
+        {{-- Search bar dihapus --}}
         <div class="flex items-center gap-space-md flex-1 max-w-xl">
-            <div class="relative w-full">
-                <span class="material-symbols-outlined absolute left-space-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
-                <input class="w-full h-10 pl-10 pr-space-md rounded-xl bg-surface-container-low text-on-surface placeholder:text-outline font-body-sm text-body-sm focus:outline-none focus:bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] transition-all" placeholder="Cari modul, sesi lab kode, atau nama siswa..." type="text"/>
-            </div>
         </div>
+        {{-- Badge kurikulum dihapus --}}
         <div class="flex items-center gap-space-md">
-            <div class="hidden lg:flex items-center gap-space-xs px-space-sm py-space-2xs rounded-full bg-surface-container">
-                <span class="material-symbols-outlined text-primary text-[16px]">school</span>
-                <span class="font-label-badge text-label-badge text-on-surface font-medium">Kurikulum Merdeka 2024</span>
-                <span class="text-outline text-label-badge">•</span>
-                <span class="font-label-badge text-label-badge text-primary font-bold">Sem. Ganjil</span>
-            </div>
             <div class="flex items-center gap-space-sm pl-space-2xs">
                 <div class="flex flex-col text-right leading-none">
                     <span class="font-title-sm text-title-sm text-on-surface font-semibold">{{ $guru->name }}</span>

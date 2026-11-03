@@ -40,7 +40,7 @@
                     <div class="flex flex-col gap-space-2xs">
                         <span class="font-title-sm text-title-sm font-bold text-on-surface" id="display-name-profil">{{ $guru->name }}</span>
                         <span class="font-body-sm text-body-sm text-on-surface-variant">{{ $guru->email }}</span>
-                        <span class="font-label-badge text-label-badge text-outline uppercase">{{ $guru->role === 'teacher' ? 'Guru Pengajar' : 'Lab Admin' }}</span>
+                        <span class="font-label-badge text-label-badge text-outline uppercase">Guru Pengajar</span>
                     </div>
                 </div>
 
@@ -54,6 +54,8 @@
                     <div class="flex flex-col gap-space-2xs">
                         <label class="font-label-badge text-label-badge uppercase text-outline">NIP <span class="text-error">*</span></label>
                         <input id="pg-nip" name="nip" type="text" required value="{{ $guru->nip }}"
+                            inputmode="numeric" pattern="[0-9]*"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                             class="h-10 px-space-sm rounded-xl bg-surface-container-low border border-outline-variant/30 font-code-inline text-code-inline text-on-surface focus:outline-none focus:border-primary"/>
                     </div>
                     <div class="flex flex-col gap-space-2xs">
@@ -69,6 +71,9 @@
                     <div class="flex flex-col gap-space-2xs">
                         <label class="font-label-badge text-label-badge uppercase text-outline">No. HP</label>
                         <input id="pg-nohp" name="no_hp" type="text" value="{{ $guru->no_hp }}"
+                            inputmode="numeric" pattern="[0-9]*"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                            placeholder="Contoh: 081234567890"
                             class="h-10 px-space-sm rounded-xl bg-surface-container-low border border-outline-variant/30 font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-primary"/>
                     </div>
                 </div>

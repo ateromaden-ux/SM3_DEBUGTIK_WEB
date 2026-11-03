@@ -6,7 +6,6 @@ use App\Http\Requests\StoreMateriRequest;
 use App\Http\Requests\UpdateMateriRequest;
 use App\Models\Guru;
 use App\Models\KuisTik;
-use App\Models\LabPraktik;
 use App\Models\MateriBelajar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -61,7 +60,7 @@ class MateriBelajarController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Materi berhasil ditambahkan',
-            'data' => $materi->load(['kuis', 'labPraktik']),
+            'data' => $materi->load(['kuis']),
         ], 201);
     }
 
@@ -75,7 +74,7 @@ class MateriBelajarController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Materi berhasil diperbarui',
-            'data' => $materi->fresh()->load(['kuis', 'labPraktik']),
+            'data' => $materi->fresh()->load(['kuis']),
         ]);
     }
 
@@ -108,7 +107,6 @@ class MateriBelajarController extends Controller
             'data' => [
                 'total_modul' => $materis->count(),
                 'total_kuis' => KuisTik::whereIn('materi_id', $ids)->count(),
-                'total_lab' => LabPraktik::whereIn('materi_id', $ids)->count(),
                 'siswa_online' => 36,
             ],
         ]);

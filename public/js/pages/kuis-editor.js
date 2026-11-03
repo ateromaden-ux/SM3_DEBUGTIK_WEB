@@ -119,6 +119,18 @@ function toggleOpsiKunci(huruf) {
     }
 }
 
+function toggleWaktuField(enabled) {
+    const waktuInput = document.getElementById('f-waktu');
+    if (enabled) {
+        waktuInput.disabled = false;
+        waktuInput.classList.remove('opacity-50', 'cursor-not-allowed');
+    } else {
+        waktuInput.disabled = true;
+        waktuInput.classList.add('opacity-50', 'cursor-not-allowed');
+        waktuInput.value = 0;
+    }
+}
+
 // ─── PANEL KIRI: highlight soal aktif ─────────────────────────────────────────
 function setActiveCard(id) {
     document.querySelectorAll('.soal-item').forEach(el => {
@@ -148,7 +160,19 @@ function loadSoalToForm(id) {
     if (disp) { disp.textContent = soal.id_soal; }
     document.getElementById('f-pertanyaan').value  = soal.pertanyaan;
     document.getElementById('f-poin').value        = soal.poin;
-    document.getElementById('f-waktu').value       = soal.waktu || 30;
+    const waktu = soal.waktu || 30;
+    document.getElementById('f-waktu').value       = waktu;
+    const waktuAktifCheckbox = document.getElementById('f-waktu-aktif');
+    const waktuInput = document.getElementById('f-waktu');
+    if (waktu === 0) {
+        waktuAktifCheckbox.checked = false;
+        waktuInput.disabled = true;
+        waktuInput.classList.add('opacity-50', 'cursor-not-allowed');
+    } else {
+        waktuAktifCheckbox.checked = true;
+        waktuInput.disabled = false;
+        waktuInput.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
     document.getElementById('btn-hapus').classList.remove('hidden');
     document.getElementById('btn-hapus').classList.add('flex');
 
@@ -256,7 +280,7 @@ function handleSimpan(e) {
         kunci_jawaban:   kunci,
         penjelasan_opsi: penj,
         poin:            document.getElementById('f-poin').value,
-        waktu:           document.getElementById('f-waktu').value,
+        waktu:           document.getElementById('f-waktu-aktif').checked ? document.getElementById('f-waktu').value : null,
     };
 
     const url    = isEdit ? `/api/kuis/${dbId}` : '/api/kuis';
@@ -269,8 +293,14 @@ function handleSimpan(e) {
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF },
         body: JSON.stringify(body),
     })
-        .then(r => r.json())
-        .then(async data => {
+        .then(async r => {
+            const data = await r.json();
+            if (!r.ok) {
+                // Handle 422 validation errors & other HTTP errors
+                const err = data.errors ? Object.values(data.errors).flat().join(', ') : (data.message || `HTTP ${r.status}`);
+                showToast(err, 'error');
+                return;
+            }
             if (data.success) {
                 showToast(isEdit ? 'Soal diperbarui' : 'Soal disimpan: ' + data.data.id_soal);
                 if (_soalPendingFiles.length)                                { await uploadSoalAttachments(data.data.id); }
@@ -305,8 +335,25 @@ function updateSoalData(soal, isEdit) {
         const card = document.querySelector(`.soal-item[data-id="${soal.id}"]`);
         if (card) {
             card.querySelector('p').innerText = soal.pertanyaan;
-            card.querySelector('.font-code-inline').innerText = soal.id_soal;
-            card.querySelectorAll('.font-label-badge')[0].innerText = soal.poin + ' poin';
+            // Target ID soal (yang kedua .font-code-inline)
+            const codeInlines = card.querySelectorAll('.font-code-inline');
+            if (codeInlines[1]) {
+                codeInlines[1].innerText = soal.id_soal;
+            }
+            // Update timer badge
+            const allBadges = card.querySelectorAll('.font-label-badge');
+            let timerBadge = null;
+            allBadges.forEach(b => { 
+                if (b.querySelector('.material-symbols-outlined')) timerBadge = b; 
+            });
+
+            if (timerBadge) {
+                const waktuText = soal.waktu ? `${soal.waktu}s` : '-';
+                timerBadge.innerHTML = `<span class="material-symbols-outlined text-[12px]">timer</span> ${waktuText}`;
+            }
+            // Update poin badge
+            const poinBadges = card.querySelectorAll('.font-label-badge');
+            poinBadges[poinBadges.length - 1].innerText = soal.poin + ' poin';
         }
     } else {
         document.getElementById('empty-state')?.remove();
@@ -421,8 +468,7 @@ function saveSettings(e) {
     const body = {
         settings_id:    document.getElementById('s-settings-id')?.value || '',
         id_kuis:        document.getElementById('s-id-kuis').value.trim(),
-        waktu_per_soal: document.getElementById('s-waktu').value,
-        satuan_waktu:   document.getElementById('s-satuan').value,
+        nama_kuis:      document.getElementById('s-nama-kuis').value.trim(),
         kkm:            document.getElementById('s-kkm').value,
     };
 
@@ -441,10 +487,6 @@ function saveSettings(e) {
                     <div class="flex items-center gap-space-xs">
                         <span class="material-symbols-outlined text-outline text-[14px]">badge</span>
                         <span class="font-code-inline text-code-inline text-on-surface font-semibold">${s.id_kuis}</span>
-                    </div>
-                    <div class="flex items-center gap-space-2xs text-on-surface-variant">
-                        <span class="material-symbols-outlined text-[14px]">timer</span>
-                        <span class="font-body-sm text-body-sm">${s.waktu_per_soal} ${s.satuan_waktu}</span>
                     </div>
                     <div class="flex items-center gap-space-2xs text-on-surface-variant">
                         <span class="material-symbols-outlined text-[14px]">school</span>

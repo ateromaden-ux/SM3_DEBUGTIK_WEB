@@ -69,12 +69,4 @@
         <span class="font-body-sm text-body-sm text-on-surface-variant">Total poin</span>
         <span class="font-code-inline text-code-inline font-bold text-on-surface" id="total-poin">{{ $soalList->sum('poin') }}</span>
     </div>
-    <div id="kkm-row" class="flex items-center justify-between mt-space-2xs {{ $settings ? '' : 'hidden' }}">
-        <span class="font-body-sm text-body-sm text-on-surface-variant" id="kkm-label">
-            Lulus jika ≥ KKM {{ $settings?->kkm ?? 70 }}%
-        </span>
-        <span class="font-code-inline text-code-inline text-secondary font-bold" id="poin-kkm">
-            ≥ {{ $settings ? round($soalList->sum('poin') * $settings->kkm / 100) : 0 }} poin
-        </span>
-    </div>
 </div>

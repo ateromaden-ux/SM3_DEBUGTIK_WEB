@@ -4,25 +4,12 @@
 --}}
 <header class="fixed top-0 left-72 right-0 h-16 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-space-lg flex items-center justify-between">
 
-    {{-- Search bar --}}
+    {{-- Search bar dihapus --}}
     <div class="flex items-center gap-space-md flex-1 max-w-xl">
-        <div class="relative w-full">
-            <span class="material-symbols-outlined absolute left-space-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
-            <input class="w-full h-10 pl-10 pr-space-md rounded-xl bg-surface-container-low text-on-surface placeholder:text-outline font-body-sm text-body-sm focus:outline-none focus:bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] transition-all"
-                   placeholder="Cari modul, sesi lab kode, atau nama siswa..."
-                   type="text"/>
-        </div>
     </div>
 
-    {{-- Kanan: notif + profil --}}
-    <div class="flex items-center gap-space-md ml-auto">
-
-        <button class="relative w-10 h-10 rounded-xl bg-surface-container-low hover:bg-surface-container hover:text-on-surface text-on-surface-variant flex items-center justify-center transition-colors"
-                type="button">
-            <span class="material-symbols-outlined text-[20px]">notifications</span>
-            <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-error"></span>
-        </button>
-
+    {{-- Kanan: profil --}}
+    <a href="#" data-tab="pengaturan" class="flex items-center gap-space-md ml-auto cursor-pointer">
         {{-- Profil guru --}}
         <div class="flex items-center gap-space-sm pl-space-2xs">
             <div class="flex flex-col text-right leading-none">
@@ -37,5 +24,5 @@
                 @endif
             </div>
         </div>
-    </div>
+    </a>
 </header>

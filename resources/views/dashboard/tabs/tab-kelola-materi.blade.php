@@ -6,7 +6,7 @@
     <div class="flex flex-col w-full gap-space-lg">
 
         {{-- ── Kartu Metrik ── --}}
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-space-md">
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-space-md">
             <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between">
                 <div class="flex items-center justify-between mb-space-sm">
                     <span class="font-label-badge text-label-badge uppercase text-outline">Modul</span>
@@ -30,19 +30,6 @@
                 <div class="flex items-baseline gap-space-2xs">
                     <span class="font-headline-xl text-headline-xl font-bold text-on-surface">{{ $metrics['total_kuis'] ?? 0 }}</span>
                     <span class="font-body-sm text-body-sm text-tertiary font-semibold">Soal</span>
-                </div>
-            </div>
-
-            <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between">
-                <div class="flex items-center justify-between mb-space-sm">
-                    <span class="font-label-badge text-label-badge uppercase text-outline">Lab</span>
-                    <div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-tertiary">
-                        <span class="material-symbols-outlined text-[18px]">terminal</span>
-                    </div>
-                </div>
-                <div class="flex items-baseline gap-space-2xs">
-                    <span class="font-headline-xl text-headline-xl font-bold text-on-surface">{{ $metrics['total_lab'] ?? 0 }}</span>
-                    <span class="font-body-sm text-body-sm text-tertiary font-semibold">Aktif</span>
                 </div>
             </div>
 
@@ -80,7 +67,6 @@
                 @php
                     $waktu       = ($materi->estimasi_waktu == 0) ? 'Tak Terbatas' : $materi->estimasi_waktu . ' menit';
                     $jumlahSoal  = $materi->kuis->count();
-                    $jumlahLab   = $materi->labPraktik->count();
                     $isPublished = $materi->kuisSettings?->isPublished();
                     $icons       = ['code','storage','terminal','dataset','menu_book'];
                     $colors      = ['primary','secondary','tertiary'];

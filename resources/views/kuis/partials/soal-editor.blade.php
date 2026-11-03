@@ -70,13 +70,16 @@
 
                     <div class="flex items-center gap-space-md mt-space-sm">
                         <input id="f-id-soal" type="hidden" value=""/>
-                        <div class="flex items-center gap-space-xs ml-auto">
+                        <label class="flex items-center gap-space-xs cursor-pointer ml-auto">
+                            <input type="checkbox" id="f-waktu-aktif" checked
+                                onchange="toggleWaktuField(this.checked)"
+                                class="w-4 h-4 rounded border-2 border-outline-variant/40 cursor-pointer"/>
                             <span class="material-symbols-outlined text-outline text-[14px]">timer</span>
                             <span class="font-label-badge text-label-badge uppercase text-outline">Waktu:</span>
                             <input id="f-waktu" type="number" min="1" max="3600" value="30"
                                 class="w-20 h-8 px-space-xs rounded-lg bg-surface-container-low border border-outline-variant/40 font-code-inline text-code-inline text-on-surface text-center focus:outline-none focus:border-secondary"/>
                             <span class="font-body-sm text-body-sm text-on-surface-variant">detik</span>
-                        </div>
+                        </label>
                     </div>
 
                     <div class="flex items-center gap-space-md mt-space-sm">

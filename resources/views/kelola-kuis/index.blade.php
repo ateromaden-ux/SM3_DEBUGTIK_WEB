@@ -69,15 +69,7 @@
         </div>
         @endif
     </div>
-    <div class="p-space-md flex-shrink-0">
-        <div class="p-space-sm rounded-xl bg-surface-container flex items-center justify-between">
-            <div class="flex flex-col">
-                <span class="font-label-badge text-label-badge text-outline">Compiler Engine</span>
-                <span class="font-code-inline text-code-inline text-on-surface font-semibold">V8 Node 20.x Online</span>
-            </div>
-            <span class="material-symbols-outlined text-tertiary text-[18px]">check_circle</span>
-        </div>
-    </div>
+    {{-- Status engine dihapus --}}
 </aside>
 
 {{-- ── Konten Utama ── --}}

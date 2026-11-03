@@ -15,13 +15,15 @@
     {{-- Navigasi --}}
     <nav class="flex flex-col gap-space-2xs px-space-md mt-space-sm">
         <a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
-           href="#" data-tab="dashboard">
+           href="#" data-tab="dashboard"
+           aria-label="Navigasi ke Dasbor Utama">
             <span class="material-symbols-outlined text-[20px]">space_dashboard</span>
             <span class="font-body-md text-body-md">Dasbor Utama</span>
         </a>
 
         <a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
-           href="#" data-tab="kelola-materi">
+           href="#" data-tab="kelola-materi"
+           aria-label="Navigasi ke Kelola Materi Belajar">
             <span class="material-symbols-outlined text-[20px]">library_books</span>
             <span class="font-body-md text-body-md">Kelola Materi Belajar</span>
         </a>
@@ -29,6 +31,8 @@
         {{-- Kelola Kuis (Dropdown) --}}
         <div class="relative" x-data="{ open: false }">
             <button @click="open = !open"
+                    aria-label="Buka/tutup daftar kuis"
+                    aria-expanded="open"
                     class="w-full flex items-center justify-between gap-space-sm px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors">
                 <div class="flex items-center gap-space-sm">
                     <span class="material-symbols-outlined text-[20px]">quiz</span>
@@ -85,13 +89,15 @@
         </div>
 
         <a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
-           href="#" data-tab="rekap">
+           href="#" data-tab="rekap"
+           aria-label="Navigasi ke Rekap Nilai">
             <span class="material-symbols-outlined text-[20px]">assessment</span>
             <span class="font-body-md text-body-md">Rekap Nilai</span>
         </a>
 
         <a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
-           href="#" data-tab="pengaturan">
+           href="#" data-tab="pengaturan"
+           aria-label="Navigasi ke Pengaturan">
             <span class="material-symbols-outlined text-[20px]">settings</span>
             <span class="font-body-md text-body-md">Pengaturan</span>
         </a>

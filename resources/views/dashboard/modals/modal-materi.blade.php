@@ -17,7 +17,8 @@
                 </div>
             </div>
             <button class="w-8 h-8 rounded-full bg-surface-container-low hover:bg-surface-container flex items-center justify-center text-on-surface-variant transition-colors"
-                    onclick="toggleModal(false)" type="button">
+                    onclick="toggleModal(false)" type="button"
+                    aria-label="Tutup modal">
                 <span class="material-symbols-outlined text-[18px]">close</span>
             </button>
         </div>
@@ -33,14 +34,20 @@
                            id="input-id-materi" placeholder="Contoh: BKMP-10, HTML-01, TIK-2024" required type="text"/>
                 </div>
                 <div class="flex flex-col gap-space-2xs">
-                    <label class="font-label-badge text-label-badge uppercase text-outline">Level Materi <span class="text-error">*</span></label>
-                    <select class="w-full h-10 px-space-sm rounded-xl bg-surface-container-low font-body-sm text-body-sm text-on-surface focus:outline-none focus:bg-surface shadow-sm cursor-pointer"
-                            id="input-level-materi">
-                        <option value="Pemula">Pemula (Fase E - Kelas X)</option>
-                        <option value="Menengah">Menengah (Fase F - Kelas XI)</option>
-                        <option value="Lanjutan">Lanjutan (Fase F - Kelas XII)</option>
-                    </select>
+                    <label class="font-label-badge text-label-badge uppercase text-outline">Estimasi Waktu (menit) <span class="text-error">*</span></label>
+                    <input class="w-full h-10 px-space-sm rounded-xl bg-surface-container-low font-code-inline text-code-inline text-on-surface focus:outline-none focus:bg-surface shadow-sm"
+                           id="input-estimasi-waktu" type="number" min="0" max="999" value="45" required/>
                 </div>
+            </div>
+
+            <div class="flex flex-col gap-space-2xs">
+                <label class="font-label-badge text-label-badge uppercase text-outline">Level Materi <span class="text-error">*</span></label>
+                <select class="w-full h-10 px-space-sm rounded-xl bg-surface-container-low font-body-sm text-body-sm text-on-surface focus:outline-none focus:bg-surface shadow-sm cursor-pointer"
+                        id="input-level-materi">
+                    <option value="Pemula">Pemula (Fase E - Kelas X)</option>
+                    <option value="Menengah">Menengah (Fase F - Kelas XI)</option>
+                    <option value="Lanjutan">Lanjutan (Fase F - Kelas XII)</option>
+                </select>
             </div>
 
             <div class="flex flex-col gap-space-2xs">

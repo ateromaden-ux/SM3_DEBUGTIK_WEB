@@ -1,41 +1,20 @@
 <?php
 
 use App\Http\Controllers\KelolaKuisController;
-use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KuisTikController;
-use App\Http\Controllers\LabPraktikController;
 use App\Http\Controllers\MateriBelajarController;
 use App\Http\Controllers\PengaturanController;
 use App\Http\Controllers\RekapNilaiController;
-use App\Models\Guru;
 use App\Models\MateriBelajar;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('auth.login');
 });
 
-Route::post('/login', [LoginController::class, 'login']);
-
-// Test auth
-Route::get('/test-auth', function () {
-    $guru = Guru::where('email', 'siti.nurhaliza@sekolah.sch.id')->first();
-    if (! $guru) {
-        return 'Guru not found';
-    }
-
-    $passwordCheck = Hash::check('password123', $guru->password);
-
-    return [
-        'guru_exists' => true,
-        'email' => $guru->email,
-        'password_check' => $passwordCheck,
-        'password_hash' => substr($guru->password, 0, 20),
-    ];
-});
+Route::post('/login', [LoginController::class, 'login'])->name('login');
 
 Route::middleware('auth:guru')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -59,8 +38,6 @@ Route::middleware('auth:guru')->group(function () {
     // API routes for kuis CRUD
     Route::prefix('api/kuis')->group(function () {
         Route::get('/check-id', [KuisTikController::class, 'checkId'])->name('kuis.check-id');
-        Route::get('/settings', [KuisTikController::class, 'getSettings'])->name('kuis.settings.get');
-        Route::post('/settings', [KuisTikController::class, 'saveSettings'])->name('kuis.settings.save');
         Route::get('/', [KuisTikController::class, 'index'])->name('kuis.index');
         Route::post('/', [KuisTikController::class, 'store'])->name('kuis.store');
         Route::put('/{kuis}', [KuisTikController::class, 'update'])->name('kuis.update');
@@ -68,33 +45,14 @@ Route::middleware('auth:guru')->group(function () {
         Route::delete('/all/{materi}', [KuisTikController::class, 'destroyAllByMateri'])->name('kuis.destroy-all');
     });
 
-    // API routes for attachments
-    Route::prefix('api/attachment')->group(function () {
-        // Materi
-        Route::post('/materi/{materi}', [AttachmentController::class, 'uploadMateri'])->name('attachment.materi.upload');
-        Route::get('/materi/{materi}', [AttachmentController::class, 'listMateri'])->name('attachment.materi.list');
-        // Soal kuis
-        Route::post('/soal/{soal}', [AttachmentController::class, 'uploadSoal'])->name('attachment.soal.upload');
-        Route::get('/soal/{soal}', [AttachmentController::class, 'listSoal'])->name('attachment.soal.list');
-        // Delete (shared)
-        Route::delete('/{attachment}', [AttachmentController::class, 'destroy'])->name('attachment.destroy');
-    });
-
     // Halaman fullpage kelola soal kuis
     Route::get('/kuis/{settings}', [KuisTikController::class, 'showPage'])->name('kuis.page');
     Route::post('/api/kuis/publish/{settings}', [KuisTikController::class, 'publish'])->name('kuis.publish');
     Route::post('/api/kuis/unpublish/{settings}', [KuisTikController::class, 'unpublish'])->name('kuis.unpublish');
     Route::get('/kuis-play/{materi}', function (MateriBelajar $materi) {
+        $materi->load('kuis');
         return view('kuis.play', compact('materi'));
     })->name('kuis.play');
-
-    // API routes for lab praktik CRUD
-    Route::prefix('api/lab')->group(function () {
-        Route::get('/', [LabPraktikController::class, 'index'])->name('lab.index');
-        Route::post('/', [LabPraktikController::class, 'store'])->name('lab.store');
-        Route::put('/{lab}', [LabPraktikController::class, 'update'])->name('lab.update');
-        Route::delete('/{lab}', [LabPraktikController::class, 'destroy'])->name('lab.destroy');
-    });
     Route::post('/logout', function () {
         Auth::guard('guru')->logout();
 

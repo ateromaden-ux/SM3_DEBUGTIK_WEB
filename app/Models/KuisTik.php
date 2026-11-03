@@ -42,9 +42,4 @@ class KuisTik extends Model
     {
         return $this->belongsTo(KuisSettings::class, 'kuis_settings_id');
     }
-
-    public function attachments()
-    {
-        return $this->morphMany(Attachment::class, 'attachable');
-    }
 }

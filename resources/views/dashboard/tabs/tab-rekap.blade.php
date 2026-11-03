@@ -20,7 +20,6 @@
                         <th class="py-space-md px-space-md">Materi</th>
                         <th class="py-space-md px-space-md">Progres</th>
                         <th class="py-space-md px-space-md text-right">Kuis</th>
-                        <th class="py-space-md px-space-md text-right">Lab</th>
                         <th class="py-space-md px-space-lg">Status</th>
                     </tr>
                 </thead>
@@ -49,9 +48,6 @@
                         <td class="py-space-md px-space-md text-right font-code-inline text-code-inline">
                             {{ $progress->nilai_kuis ?? '-' }}
                         </td>
-                        <td class="py-space-md px-space-md text-right font-code-inline text-code-inline">
-                            {{ $progress->nilai_lab ?? '-' }}
-                        </td>
                         <td class="py-space-md px-space-lg">
                             @if($progress->status_selesai)
                                 <span class="inline-flex items-center gap-1 px-space-xs py-1 rounded-full bg-tertiary/10 text-tertiary font-label-badge text-label-badge font-bold">
@@ -70,7 +66,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="py-space-xl px-space-lg text-center font-body-sm text-body-sm text-outline">
+                        <td colspan="5" class="py-space-xl px-space-lg text-center font-body-sm text-body-sm text-outline">
                             Belum ada data nilai siswa.
                         </td>
                     </tr>

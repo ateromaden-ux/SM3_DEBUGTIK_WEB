@@ -60,7 +60,17 @@
                 <p class="font-body-sm text-body-sm text-outline">ID ini dipakai sebagai prefix semua soal.</p>
             </div>
 
-
+            {{-- Nama Kuis --}}
+            <div class="flex flex-col gap-space-2xs mb-space-sm">
+                <label class="font-label-badge text-label-badge uppercase text-outline">
+                    Nama Kuis <span class="text-error">*</span>
+                </label>
+                <input id="s-nama-kuis" type="text" required
+                    placeholder="Contoh: Kuis HTML Dasar"
+                    value="{{ $settings?->nama_kuis ?? '' }}"
+                    {{ $settings?->isPublished() ? 'disabled' : '' }}
+                    class="h-10 px-space-sm rounded-xl bg-surface-container-low border border-outline-variant/30 font-body-md text-body-md text-on-surface focus:outline-none focus:border-secondary disabled:opacity-50 disabled:cursor-not-allowed"/>
+            </div>
 
             {{-- KKM --}}
             <div class="flex flex-col gap-space-2xs mb-space-md">

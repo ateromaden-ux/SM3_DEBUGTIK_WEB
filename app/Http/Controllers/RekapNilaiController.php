@@ -11,8 +11,8 @@ class RekapNilaiController extends Controller
     {
         $guru = Auth::guard('guru')->user();
 
-        $rataRataNilaiKuis = ProgressBelajar::whereNotNull('nilai_kuis')->avg('nilai_kuis') ?? 88.4;
-        $rataRataNilaiLab = ProgressBelajar::whereNotNull('nilai_lab')->avg('nilai_lab') ?? 91.2;
+        $rataRataNilaiKuis = ProgressBelajar::whereNotNull('nilai_kuis')->avg('nilai_kuis') ?? 0;
+        $rataRataNilaiLab = ProgressBelajar::whereNotNull('nilai_lab')->avg('nilai_lab') ?? 0;
 
         return view('rekap-nilai', compact('guru', 'rataRataNilaiKuis', 'rataRataNilaiLab'));
     }

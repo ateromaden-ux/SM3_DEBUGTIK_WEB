@@ -36,18 +36,8 @@ class MateriBelajar extends Model
         return $this->hasMany(KuisTik::class, 'materi_id');
     }
 
-    public function labPraktik()
-    {
-        return $this->hasMany(LabPraktik::class, 'materi_id');
-    }
-
     public function kuisSettings()
     {
         return $this->hasOne(KuisSettings::class, 'materi_id');
-    }
-
-    public function attachments()
-    {
-        return $this->morphMany(Attachment::class, 'attachable');
     }
 }

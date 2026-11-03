@@ -32,7 +32,7 @@ class DashboardController extends Controller
         // Materi list (for manage materials section) - ALL materials for this guru
         $materiList = MateriBelajar::where('guru_id', $guru->id)
             ->orderBy('created_at', 'desc')
-            ->with(['kuis', 'labPraktik', 'kuisSettings'])
+            ->with(['kuis', 'kuisSettings'])
             ->get();
 
         // Kuis list (for sidebar dropdown) - ALL kuis for this guru
@@ -44,12 +44,9 @@ class DashboardController extends Controller
         // Metrics
         $metrics = [
             'total_modul' => $materiList->count(),
-            'total_kuis' => $materiList->sum(function ($m) {
-                return $m->kuis->count();
-            }),
-            'total_lab' => $materiList->sum(function ($m) {
-                return $m->labPraktik->count();
-            }),
+            'total_kuis' => KuisSettings::where('guru_id', $guru->id)
+                ->where('status', 'published')
+                ->count(),
             'siswa_online' => 36, // TODO: track active students
             'total_siswa' => User::count(),
         ];

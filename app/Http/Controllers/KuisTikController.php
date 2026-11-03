@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\SaveKuisSettingsRequest;
 use App\Http\Requests\StoreKuisRequest;
 use App\Http\Requests\UpdateKuisRequest;
 use App\Models\Guru;
@@ -40,58 +39,6 @@ class KuisTikController extends Controller
             ?? 'Kuis';
 
         return view('kuis.index', compact('guru', 'settings', 'soalList', 'judulKuis'));
-    }
-
-    // ─── SETTINGS ─────────────────────────────────────────────────────────────
-
-    /**
-     * GET /api/kuis/settings?kuis_settings_id=X
-     */
-    public function getSettings(Request $request)
-    {
-        $settings = KuisSettings::find($request->query('kuis_settings_id'));
-
-        return response()->json(['success' => true, 'data' => $settings]);
-    }
-
-    /**
-     * POST /api/kuis/settings
-     */
-    public function saveSettings(SaveKuisSettingsRequest $request)
-    {
-        $validated = $request->validated();
-
-        // Cek duplikasi id_kuis
-        $settingsId = $request->input('settings_id');
-        $duplicate = KuisSettings::where('id_kuis', $validated['id_kuis'])
-            ->when($settingsId, fn ($q) => $q->where('id', '!=', $settingsId))
-            ->exists();
-
-        if ($duplicate) {
-            return response()->json([
-                'success' => false,
-                'errors' => ['id_kuis' => ['ID Kuis sudah digunakan.']],
-            ], 422);
-        }
-
-        // Pastikan guru_id terisi
-        if (empty($validated['guru_id'])) {
-            $validated['guru_id'] = Auth::guard('guru')->id()
-                ?? Guru::first()->id;
-        }
-
-        if ($settingsId) {
-            $settings = KuisSettings::findOrFail($settingsId);
-            $settings->update($validated);
-        } else {
-            $settings = KuisSettings::create($validated);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Pengaturan kuis berhasil disimpan.',
-            'data' => $settings,
-        ]);
     }
 
     // ─── SOAL CRUD ────────────────────────────────────────────────────────────
