@@ -126,7 +126,7 @@
 
                     {{-- Grid 2x2 tile opsi --}}
                     <div class="grid grid-cols-2 gap-space-md flex-1" id="opsi-grid">
-                        @foreach(['A','B','C','D'] as $huruf)
+                        @foreach(['A','B','C','D','E'] as $huruf)
                         <div class="opsi-tile group relative flex flex-col rounded-2xl border-2 border-outline-variant/30 bg-surface-container-lowest hover:border-outline-variant transition-all cursor-pointer overflow-hidden"
                              id="tile-{{ strtolower($huruf) }}"
                              onclick="toggleOpsiKunci('{{ $huruf }}')">

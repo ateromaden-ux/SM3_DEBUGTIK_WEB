@@ -50,8 +50,9 @@ function setTipe(tipe) {
     essaySection.classList.toggle('hidden', !isEssay);
     essaySection.classList.toggle('flex', isEssay);
 
-    ['a', 'b', 'c', 'd'].forEach(h => {
+    ['a', 'b', 'c', 'd', 'e'].forEach(h => {
         const badge = document.getElementById(`badge-${h}`);
+        if (!badge) return;
         if (isMulti) { badge.classList.remove('rounded-xl'); badge.classList.add('rounded-md'); }
         else          { badge.classList.add('rounded-xl');    badge.classList.remove('rounded-md'); }
     });
@@ -69,7 +70,7 @@ function setTipe(tipe) {
 function onTipeChange() { setTipe(document.getElementById('f-tipe').value); }
 
 function clearKunci() {
-    ['a', 'b', 'c', 'd'].forEach(h => _deselect(h));
+    ['a', 'b', 'c', 'd', 'e'].forEach(h => _deselect(h));
     document.getElementById('f-kunci').value = '';
 }
 
@@ -111,7 +112,7 @@ function toggleOpsiKunci(huruf) {
         document.getElementById('f-kunci').value = JSON.stringify([huruf]);
     } else {
         if (isOn) { _deselect(hl); } else { _select(hl); }
-        const selected = ['A', 'B', 'C', 'D'].filter(h => {
+        const selected = ['A', 'B', 'C', 'D', 'E'].filter(h => {
             const t = document.getElementById(`tile-${h.toLowerCase()}`);
             return t && t.classList.contains('border-tertiary');
         });
@@ -187,17 +188,19 @@ function loadSoalToForm(id) {
         const penj = Array.isArray(soal.penjelasan_opsi)
             ? soal.penjelasan_opsi
             : (soal.penjelasan_opsi ? JSON.parse(soal.penjelasan_opsi) : []);
-        ['a', 'b', 'c', 'd'].forEach((h, i) => {
-            document.getElementById(`opsi-${h}`).value = opsi[i] || '';
-            document.getElementById(`penj-${h}`).value = penj[i] || '';
+        ['a', 'b', 'c', 'd', 'e'].forEach((h, i) => {
+            const oEl = document.getElementById(`opsi-${h}`);
+            const pEl = document.getElementById(`penj-${h}`);
+            if (oEl) oEl.value = opsi[i] || '';
+            if (pEl) pEl.value = penj[i] || '';
         });
 
         const kunci = Array.isArray(soal.kunci_jawaban)
             ? soal.kunci_jawaban
             : (soal.kunci_jawaban ? JSON.parse(soal.kunci_jawaban) : []);
-        const hurufIdx = { A: 0, B: 1, C: 2, D: 3 };
+        const hurufIdx = { A: 0, B: 1, C: 2, D: 3, E: 4 };
         kunci.forEach(k => {
-            const huruf = ['A', 'B', 'C', 'D'].find(h => h === k || opsi[hurufIdx[h]] === k);
+            const huruf = ['A', 'B', 'C', 'D', 'E'].find(h => h === k || opsi[hurufIdx[h]] === k);
             if (huruf) { _select(huruf.toLowerCase()); }
         });
         document.getElementById('f-kunci').value = JSON.stringify(kunci);
@@ -249,8 +252,8 @@ function handleSimpan(e) {
     let opsi = null, penj = null, kunci = [''];
 
     if (tipe !== 'essay') {
-        opsi = ['a', 'b', 'c', 'd'].map(h => document.getElementById(`opsi-${h}`).value.trim()).filter(v => v);
-        penj = ['a', 'b', 'c', 'd'].map(h => document.getElementById(`penj-${h}`).value.trim());
+        opsi = ['a', 'b', 'c', 'd', 'e'].map(h => document.getElementById(`opsi-${h}`)?.value.trim()).filter(v => v !== undefined && v !== null && v !== "");
+        penj = ['a', 'b', 'c', 'd', 'e'].map(h => document.getElementById(`penj-${h}`)?.value.trim() || "");
 
         const kunciRaw = document.getElementById('f-kunci').value;
         try { kunci = JSON.parse(kunciRaw); } catch (_) { kunci = kunciRaw ? [kunciRaw] : []; }
@@ -265,8 +268,11 @@ function handleSimpan(e) {
             return;
         }
 
-        const hurufIdx = { A: 0, B: 1, C: 2, D: 3 };
-        kunci = kunci.map(k => opsi[hurufIdx[k]] ?? k);
+        const hurufIdx = { A: 0, B: 1, C: 2, D: 3, E: 4 };
+        kunci = kunci.map(k => {
+            const idx = hurufIdx[k];
+            return (idx !== undefined && opsi[idx] !== undefined) ? opsi[idx] : k;
+        });
     } else {
         const panduan = document.getElementById('f-essay-panduan').value.trim();
         kunci = panduan ? [panduan] : [''];
@@ -662,8 +668,8 @@ function toggleMateriDropdown() {}
 function toggleMateriSub() {}
 
 // ─── GAMBAR OPSI JAWABAN ──────────────────────────────────────────────────────
-const _opsiPendingImages = { a: null, b: null, c: null, d: null };
-const _opsiSavedImages   = { a: null, b: null, c: null, d: null };
+const _opsiPendingImages = { a: null, b: null, c: null, d: null, e: null };
+const _opsiSavedImages   = { a: null, b: null, c: null, d: null, e: null };
 
 function handleOpsiImage(huruf, input) {
     const file = input.files[0];
@@ -699,7 +705,7 @@ function removeOpsiImage(huruf) {
 }
 
 async function uploadOpsiImages(soalId) {
-    for (const huruf of ['a', 'b', 'c', 'd']) {
+    for (const huruf of ['a', 'b', 'c', 'd', 'e']) {
         const file = _opsiPendingImages[huruf];
         if (!file) { continue; }
         const ext     = file.name.split('.').pop();
@@ -713,13 +719,13 @@ async function uploadOpsiImages(soalId) {
 }
 
 function loadOpsiImages(soalId) {
-    ['a', 'b', 'c', 'd'].forEach(h => { _opsiSavedImages[h] = null; removeOpsiImage(h); });
+    ['a', 'b', 'c', 'd', 'e'].forEach(h => { _opsiSavedImages[h] = null; removeOpsiImage(h); });
     fetch(`/api/attachment/soal/${soalId}`, { headers: { 'X-CSRF-TOKEN': CSRF } })
         .then(r => r.json())
         .then(data => {
             if (!data.success) { return; }
             data.data.forEach(att => {
-                const match = att.nama_file.match(/^opsi-([ABCD])-/i);
+                const match = att.nama_file.match(/^opsi-([ABCDE])-/i);
                 if (match) {
                     const huruf = match[1].toLowerCase();
                     _opsiSavedImages[huruf] = att.url;
@@ -730,7 +736,7 @@ function loadOpsiImages(soalId) {
 }
 
 function clearOpsiImages() {
-    ['a', 'b', 'c', 'd'].forEach(h => removeOpsiImage(h));
+    ['a', 'b', 'c', 'd', 'e'].forEach(h => removeOpsiImage(h));
 }
 
 // ─── ATTACHMENT SOAL ──────────────────────────────────────────────────────────

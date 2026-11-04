@@ -44,4 +44,8 @@ Route::middleware('api.auth')->group(function () {
     // Kuis (hanya yang published)
     Route::get('/kuis/{materi}', [KuisApiController::class, 'show'])->name('api.kuis.show');
     Route::post('/kuis/{materi}/submit', [KuisApiController::class, 'submit'])->name('api.kuis.submit');
+
+    // Lab Praktik
+    Route::get('/lab/{materi}', [\App\Http\Controllers\Api\LabApiController::class, 'getLab'])->name('api.lab.get');
+    Route::post('/lab/{materi}/submit', [\App\Http\Controllers\Api\LabApiController::class, 'submitLab'])->name('api.lab.submit');
 });
