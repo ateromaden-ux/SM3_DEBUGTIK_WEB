@@ -14,8 +14,10 @@ class MateriApiController extends Controller
      */
     public function index(Request $request)
     {
+        $user = $request->user();
         $materi = MateriBelajar::where('published', true)
             ->with(['kuisSettings', 'kuis', 'attachments'])
+            ->with(['progressBelajar' => fn($q) => $q->where('user_id', $user?->id)])
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(fn ($m) => $this->formatMateri($m, false));
@@ -31,13 +33,14 @@ class MateriApiController extends Controller
      * GET /api/materi/{materi}
      * Detail satu materi + konten + attachment.
      */
-    public function show(MateriBelajar $materi)
+    public function show(Request $request, MateriBelajar $materi)
     {
         if (! $materi->published) {
             return response()->json(['success' => false, 'message' => 'Materi tidak tersedia.'], 404);
         }
 
-        $materi->load(['kuisSettings', 'kuis', 'attachments', 'guru']);
+        $user = $request->user();
+        $materi->load(['kuisSettings', 'kuis', 'attachments', 'guru', 'progressBelajar' => fn($q) => $q->where('user_id', $user?->id)]);
 
         return response()->json([
             'success' => true,
@@ -47,6 +50,8 @@ class MateriApiController extends Controller
 
     private function formatMateri(MateriBelajar $m, bool $withKonten = false): array
     {
+        $progress = $m->progressBelajar->first();
+
         $data = [
             'id' => $m->id,
             'id_materi' => $m->id_materi,
@@ -56,6 +61,13 @@ class MateriApiController extends Controller
             'level' => $m->level,
             'estimasi_waktu' => $m->estimasi_waktu,
             'guru' => $m->guru ? ['name' => $m->guru->name] : null,
+            'progres' => [
+                'status' => $progress ? $progress->status : 'belum_mulai',
+                'nilai_kuis' => $progress ? $progress->nilai_kuis : null,
+                'nilai_akhir' => $progress ? $progress->nilai_akhir : null,
+                'status_selesai' => $progress ? (bool) $progress->status_selesai : false,
+                'persentase_selesai' => $progress ? $progress->persentase_selesai : 0,
+            ],
             'kuis' => $m->kuisSettings ? [
                 'ada' => true,
                 'status' => $m->kuisSettings->status,

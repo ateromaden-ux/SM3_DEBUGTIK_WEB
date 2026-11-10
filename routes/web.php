@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Auth\AdminAuthController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\KelolaKuisController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
@@ -14,7 +16,18 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
+// Admin Auth Routes
+Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
+Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
+Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
+
 Route::post('/login', [LoginController::class, 'login'])->name('login');
+
+// Route Super Admin
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::post('/tambah-guru', [AdminController::class, 'storeGuru'])->name('admin.store-guru');
+});
 
 Route::middleware('auth:guru')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

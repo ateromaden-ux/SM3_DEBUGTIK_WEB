@@ -36,6 +36,13 @@ Route::middleware('api.auth')->group(function () {
         Route::put('/change-password', [AuthApiController::class, 'changePassword'])->name('api.auth.password');
     });
 
+    // Forgot Password Flow
+    Route::prefix('auth')->group(function () {
+        Route::post('/forgot-password', [AuthApiController::class, 'forgotPassword'])->name('api.auth.forgot-password');
+        Route::post('/verify-otp', [AuthApiController::class, 'verifyOtp'])->name('api.auth.verify-otp');
+        Route::post('/reset-password', [AuthApiController::class, 'resetPassword'])->name('api.auth.reset-password');
+    });
+
     // ── Konten untuk siswa ─────────────────────────────────────────────────
     // Materi belajar (hanya yang published)
     Route::get('/materi', [MateriApiController::class, 'index'])->name('api.materi.index');

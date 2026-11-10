@@ -7,6 +7,7 @@ use App\Models\ApiToken;
 use App\Models\Guru;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -234,6 +235,68 @@ class AuthApiController extends Controller
             'success' => true,
             'message' => 'Password berhasil diubah.',
         ]);
+    }
+
+    /**
+     * POST /api/auth/forgot-password
+     * Kirim kode OTP ke email siswa.
+     */
+    public function forgotPassword(Request $request)
+    {
+        $request->validate(['email' => 'required|email|exists:users,email']);
+
+        $otp = rand(100000, 999999);
+        
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $request->email],
+            [
+                'token' => Hash::make((string)$otp), 
+                'created_at' => now()
+            ]
+        );
+
+        // Simulasi pengiriman email via log
+        \Log::info("OTP Reset Password untuk {$request->email}: {$otp}");
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kode verifikasi telah dikirim ke email Anda.'
+        ]);
+    }
+
+    /**
+     * POST /api/auth/verify-otp
+     * Verifikasi kode OTP.
+     */
+    public function verifyOtp(Request $request)
+    {
+        $request->validate(['email' => 'required|email', 'otp' => 'required|string']);
+
+        $record = DB::table('password_reset_tokens')->where('email', $request->email)->first();
+
+        if (!$record || !Hash::check($request->otp, $record->token)) {
+            return response()->json(['success' => false, 'message' => 'Kode verifikasi salah atau kadaluarsa.'], 422);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Kode verifikasi valid.']);
+    }
+
+    /**
+     * POST /api/auth/reset-password
+     * Reset password menggunakan email dan password baru.
+     */
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'password' => 'required|string|min:8|confirmed'
+        ]);
+
+        User::where('email', $request->email)->update(['password' => $request->password]);
+        
+        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+        return response()->json(['success' => true, 'message' => 'Password berhasil diperbarui.']);
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
