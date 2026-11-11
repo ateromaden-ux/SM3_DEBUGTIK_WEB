@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\AuthApiController;
 use App\Http\Controllers\Api\KuisApiController;
 use App\Http\Controllers\Api\MateriApiController;
+use App\Http\Controllers\KuisTikController;
+use App\Models\MateriBelajar;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -51,6 +53,10 @@ Route::middleware('api.auth')->group(function () {
     // Kuis (hanya yang published)
     Route::get('/kuis/{materi}', [KuisApiController::class, 'show'])->name('api.kuis.show');
     Route::post('/kuis/{materi}/submit', [KuisApiController::class, 'submit'])->name('api.kuis.submit');
+
+    // Tambahan rute KuisTik untuk akses via token API
+    Route::get('/kuis', [\App\Http\Controllers\KuisTikController::class, 'index'])->name('api.kuis.tik.index');
+    Route::get('/kuis/check-id', [\App\Http\Controllers\KuisTikController::class, 'checkId'])->name('api.kuis.tik.check-id');
 
     // Lab Praktik
     Route::get('/lab/{materi}', [\App\Http\Controllers\Api\LabApiController::class, 'getLab'])->name('api.lab.get');

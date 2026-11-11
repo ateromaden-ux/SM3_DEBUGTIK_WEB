@@ -9,7 +9,7 @@
             </div>
             <div class="flex flex-col">
                 <span class="font-headline-lg text-headline-lg font-bold text-white">Selamat Datang, {{ $guru->name }}</span>
-                <span class="font-body-md text-body-md text-white/80 mt-1">{{ $guru->email }} • Lab Komputer TIK RPL</span>
+                <span class="font-body-md text-body-md text-white/80 mt-1">{{ $guru->email }} • SMAN 1 Kencong</span>
             </div>
         </div>
         

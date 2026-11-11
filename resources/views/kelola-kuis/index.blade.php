@@ -91,8 +91,12 @@
                 Buat Kuis Baru
             </button>
             <span class="font-title-sm text-title-sm font-semibold text-on-surface">{{ $guru->name }}</span>
-            <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+            <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center overflow-hidden">
+                @if($guru->foto_profil)
+                    <img src="{{ Storage::disk('public')->url($guru->foto_profil) }}" class="w-full h-full object-cover"/>
+                @else
+                    <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+                @endif
             </div>
         </div>
     </header>

@@ -68,59 +68,38 @@ class AuthApiController extends Controller
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
-            'role' => 'nullable|in:siswa,guru',
         ]);
 
-        $role = $request->input('role', 'siswa'); // default: coba siswa dulu
         $email = $request->input('email');
         $pass = $request->input('password');
 
-        // ── Coba login sebagai siswa ──────────────────────────────────────────
-        if ($role !== 'guru') {
-            $user = User::where('email', $email)->where('active', true)->first();
+        // Cari user tanpa filter role dulu
+        $user = User::where('email', $email)->first();
 
-            if ($user && Hash::check($pass, $user->password)) {
-                // Hapus token lama untuk device ini (opsional — bisa multi-device)
-                $user->apiTokens()->where('name', 'android-login')->delete();
-                $token = $user->createApiToken('android-login');
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Login berhasil.',
-                    'data' => [
-                        'token' => $token,
-                        'type' => 'Bearer',
-                        'role' => 'siswa',
-                        'user' => $this->formatUser($user),
-                    ],
-                ]);
+        if ($user && Hash::check($pass, $user->password)) {
+            if (!$user->active) {
+                return response()->json(['success' => false, 'message' => 'Akun tidak aktif.'], 403);
             }
-        }
 
-        // ── Coba login sebagai guru ───────────────────────────────────────────
-        if ($role !== 'siswa') {
-            $guru = Guru::where('email', $email)->where('active', true)->first();
+            $token = $user->createApiToken('android-login');
 
-            if ($guru && Hash::check($pass, $guru->password)) {
-                $guru->apiTokens()->where('name', 'android-login')->delete();
-                $token = $guru->createApiToken('android-login');
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Login berhasil.',
-                    'data' => [
-                        'token' => $token,
-                        'type' => 'Bearer',
-                        'role' => 'guru',
-                        'guru' => $this->formatGuru($guru),
-                    ],
-                ]);
-            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Login berhasil.',
+                'data' => [
+                    'token' => $token,
+                    'type' => 'Bearer',
+                    'user' => $this->formatUser($user),
+                ],
+                // Kompatibilitas dengan kode lama Flutter
+                'token' => $token, 
+                'user' => $this->formatUser($user),
+            ]);
         }
 
         return response()->json([
             'success' => false,
-            'message' => 'Email atau password salah.',
+            'message' => 'Email atau kata sandi salah.',
         ], 401);
     }
 

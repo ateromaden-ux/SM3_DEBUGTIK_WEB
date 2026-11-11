@@ -49,20 +49,10 @@ Route::middleware('auth:guru')->group(function () {
         Route::delete('/{materi}', [MateriBelajarController::class, 'destroy'])->name('kelola.materi.destroy');
     });
 
-    // API routes for kuis CRUD
-    Route::prefix('api/kuis')->group(function () {
-        Route::get('/check-id', [KuisTikController::class, 'checkId'])->name('kuis.check-id');
-        Route::get('/', [KuisTikController::class, 'index'])->name('kuis.index');
-        Route::post('/', [KuisTikController::class, 'store'])->name('kuis.store');
-        Route::put('/{kuis}', [KuisTikController::class, 'update'])->name('kuis.update');
-        Route::delete('/{kuis}', [KuisTikController::class, 'destroy'])->name('kuis.destroy');
-        Route::delete('/all/{materi}', [KuisTikController::class, 'destroyAllByMateri'])->name('kuis.destroy-all');
-    });
-
     // Halaman fullpage kelola soal kuis
     Route::get('/kuis/{settings}', [KuisTikController::class, 'showPage'])->name('kuis.page');
-    Route::post('/api/kuis/publish/{settings}', [KuisTikController::class, 'publish'])->name('kuis.publish');
-    Route::post('/api/kuis/unpublish/{settings}', [KuisTikController::class, 'unpublish'])->name('kuis.unpublish');
+    Route::post('/kuis/publish/{settings}', [KuisTikController::class, 'publish'])->name('kuis.publish');
+    Route::post('/kuis/unpublish/{settings}', [KuisTikController::class, 'unpublish'])->name('kuis.unpublish');
     Route::get('/kuis-play/{materi}', function (MateriBelajar $materi) {
         $materi->load('kuis');
         return view('kuis.play', compact('materi'));

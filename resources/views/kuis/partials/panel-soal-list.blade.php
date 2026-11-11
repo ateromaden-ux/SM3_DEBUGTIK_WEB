@@ -8,6 +8,24 @@
     <span class="font-title-sm text-title-sm font-bold text-on-surface">Daftar Soal</span>
 </div>
 
+{{-- Alert: kuis sudah published --}}
+@if($settings && $settings->isPublished())
+<div class="mx-space-sm mt-space-sm flex-shrink-0">
+    <div class="flex items-start gap-space-xs p-space-sm rounded-xl bg-error/10 border border-error/20">
+        <span class="material-symbols-outlined text-error text-[18px] flex-shrink-0 mt-0.5">lock</span>
+        <div class="flex flex-col gap-space-2xs">
+            <span class="font-body-sm text-body-sm text-error font-semibold">Kuis sedang aktif</span>
+            <span class="font-label-badge text-label-badge text-error/80">Tidak bisa menambah atau menghapus soal selama kuis dipublish. Tarik ke Draft terlebih dahulu.</span>
+            <button onclick="unpublishKuis()"
+                class="mt-space-2xs self-start flex items-center gap-space-2xs px-space-sm py-space-2xs rounded-lg bg-error/10 hover:bg-error/20 text-error font-body-sm text-body-sm font-semibold transition-colors">
+                <span class="material-symbols-outlined text-[14px]">unpublished</span>
+                Tarik ke Draft
+            </button>
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- List soal --}}
 <div class="flex-1 overflow-y-auto p-space-sm flex flex-col gap-space-xs" id="soal-list">
     @if(!$settings)
