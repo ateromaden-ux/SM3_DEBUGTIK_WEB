@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\KelolaKuisController;
@@ -24,9 +25,12 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admi
 Route::post('/login', [LoginController::class, 'login'])->name('login');
 
 // Route Super Admin
-Route::middleware(['auth'])->prefix('admin')->group(function () {
+Route::middleware(['superadmin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
-    Route::post('/tambah-guru', [AdminController::class, 'storeGuru'])->name('admin.store-guru');
+    Route::post('/tambah-guru', [SuperAdminController::class, 'store'])->name('admin.store-guru');
+    Route::post('/kelola-guru', [SuperAdminController::class, 'store'])->name('admin.guru.store');
+    Route::get('/kelola-guru', [SuperAdminController::class, 'index'])->name('admin.guru.index');
+    Route::delete('/kelola-guru/{guru}', [SuperAdminController::class, 'destroy'])->name('admin.guru.destroy');
 });
 
 Route::middleware('auth:guru')->group(function () {

@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
 
         // Seeder data DebugTIK
         $this->call([
+            AdminSeeder::class,
             GuruSeeder::class,
         ]);
     }

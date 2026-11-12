@@ -19,28 +19,26 @@ class AdminAuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => 'required|email',
+            'email' => 'required',
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $credentials['email'])
-                    ->where('role', 'admin')
-                    ->first();
+        $admin = \App\Models\SuperAdmin::where('username', $credentials['email'])->first();
 
-        if ($user && Hash::check($credentials['password'], $user->password)) {
-            Auth::guard('web')->login($user, $request->filled('remember'));
+        if ($admin && \Hash::check($credentials['password'], $admin->password)) {
+            session(['is_super_admin' => true]);
             $request->session()->regenerate();
-            return redirect()->intended('/admin/dashboard');
+            return redirect('/admin/dashboard');
         }
 
-        throw ValidationException::withMessages([
-            'email' => 'Kredensial admin tidak valid.',
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'email' => 'Kredensial tidak valid.',
         ]);
     }
 
     public function logout(Request $request)
     {
-        Auth::guard('web')->logout();
+        session()->forget('is_super_admin');
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/admin/login');

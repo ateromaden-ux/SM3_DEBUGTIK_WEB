@@ -25,8 +25,8 @@
         <form action="{{ route('admin.login.submit') }}" method="POST" class="space-y-4">
             @csrf
             <div>
-                <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Email</label>
-                <input type="email" name="email" required class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-indigo-500" value="{{ old('email') }}">
+                <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Username</label>
+                <input type="text" name="email" required class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-indigo-500" value="{{ old('email') }}">
             </div>
             <div>
                 <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Password</label>
